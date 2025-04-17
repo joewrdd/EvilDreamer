@@ -46,6 +46,295 @@ function checkCollision(sprite1, sprite2) {
   );
 }
 
+class Menu extends Level {
+  constructor(game) {
+    super(game);
+    this.game = game;
+  }
+
+  init() {
+    let myBackground = new Background(
+      0,
+      0,
+      this.game.canvas.width,
+      this.game.canvas.height,
+      "public/background/pinkBG.png"
+    );
+    let myGameTitle = new GameTitle(
+      310,
+      20,
+      421,
+      142,
+      "public/theme/gamename.png"
+    );
+    let myButton = new Button(
+      335,
+      200,
+      316,
+      76,
+      "public/theme/play.png",
+      this.game,
+      () => {
+        this.game.changeLevel(1);
+      }
+    );
+    let myButton2 = new Button(
+      335,
+      300,
+      324,
+      77,
+      "public/theme/tutorial.png",
+      this.game,
+      () => {
+        this.game.changeLevel(2);
+      }
+    );
+
+    this.game.addSprite(myBackground);
+    this.game.addSprite(myGameTitle);
+    this.game.addSprite(myButton);
+    this.game.addSprite(myButton2);
+  }
+}
+
+class Level1 extends Level {
+  constructor(game) {
+    super(game);
+    this.game = game;
+  }
+
+  init() {
+    let myBackground = new Background(
+      0,
+      0,
+      this.game.canvas.width,
+      this.game.canvas.height,
+      "public/background/platformer_background_1.png"
+    );
+    let myHero = new Hero(100, 410, this.game);
+    let myEnemyGenerator = new EnemyGenerator(
+      120,
+      this.game.canvas.width,
+      this.game.canvas.height,
+      this.game
+    );
+    let myLives = new Lives(this.game);
+    let myScore = new Score(this.game);
+
+    this.game.addSprite(myBackground);
+    this.game.addSprite(myHero);
+    this.game.addSprite(myEnemyGenerator);
+    this.game.addSprite(myLives);
+    this.game.addSprite(myScore);
+  }
+}
+
+class Level2 extends Level {
+  constructor(game) {
+    super(game);
+    this.game = game;
+  }
+
+  init() {}
+}
+
+class Tutorial extends Level {
+  constructor(game) {
+    super(game);
+    this.game = game;
+  }
+
+  init() {
+    let myBackground = new Background(
+      0,
+      0,
+      this.game.canvas.width,
+      this.game.canvas.height,
+      "public/background/pinkBGTrans.png"
+    );
+
+    let tutorialTitle = new GameTitle(
+      300,
+      -60,
+      380,
+      250,
+      "public/theme/howToPlay.png"
+    );
+
+    let controlsText = {
+      items: [
+        { key: "ARROW KEYS / A,D", action: "Move Left & Right" },
+        { key: "SPACE", action: "Jump" },
+        { key: "UP ARROW", action: "Shoot" },
+        { key: "GOAL", action: "Defeat Enemies & Survive!" },
+      ],
+      x: 300,
+      y: 160,
+      lineHeight: 40,
+      keyFont: "28px 'boorsok'",
+      actionFont: "20px 'boorsok'",
+      keyColor: "#FF69B4",
+      actionColor: "#FFFFFF",
+      draw: function (ctx) {
+        ctx.save();
+
+        for (let i = 0; i < this.items.length; i++) {
+          const item = this.items[i];
+          const yPos = this.y + i * this.lineHeight;
+
+          ctx.font = this.keyFont;
+          ctx.fillStyle = this.keyColor;
+          ctx.textAlign = "right";
+          ctx.shadowColor = "rgb(0, 0, 0)";
+          ctx.shadowBlur = 3;
+          ctx.shadowOffsetX = 2;
+          ctx.shadowOffsetY = 2;
+          ctx.fillText(item.key, this.x, yPos);
+
+          ctx.font = this.actionFont;
+          ctx.fillStyle = this.actionColor;
+          ctx.textAlign = "left";
+          ctx.fillText(" - " + item.action, this.x + 10, yPos);
+        }
+
+        ctx.restore();
+      },
+      update: function () {
+        return false;
+      },
+    };
+
+    let enemyText = {
+      title: "ENEMY TYPES:",
+      items: [
+        { name: "Ground Enemy", desc: "Can Be Jumped On or Shot" },
+        { name: "Flying Enemy", desc: "Shoots Bullets, Must Be Shot" },
+        {
+          name: "Cloud Platform",
+          desc: "Shoots in All Directions When Activated",
+        },
+      ],
+      x: 300,
+      y: 320,
+      lineHeight: 35,
+      titleFont: "28px 'boorsok'",
+      itemFont: "20px 'boorsok'",
+      titleColor: "#FF69B4",
+      nameColor: "#0CC0DF",
+      descColor: "#FFFFFF",
+      draw: function (ctx) {
+        ctx.save();
+
+        ctx.font = this.titleFont;
+        ctx.fillStyle = this.titleColor;
+        ctx.textAlign = "left";
+        ctx.shadowColor = "rgb(0, 0, 0)";
+        ctx.shadowBlur = 3;
+        ctx.shadowOffsetX = 2;
+        ctx.shadowOffsetY = 2;
+        ctx.fillText(this.title, this.x, this.y);
+
+        for (let i = 0; i < this.items.length; i++) {
+          const item = this.items[i];
+          const yPos = this.y + 30 + i * this.lineHeight;
+
+          ctx.font = this.itemFont;
+          ctx.fillStyle = this.nameColor;
+          ctx.fillText("• " + item.name + ":", this.x, yPos);
+
+          ctx.fillStyle = this.descColor;
+          ctx.fillText(" " + item.desc, this.x + 180, yPos);
+        }
+
+        ctx.restore();
+      },
+      update: function () {
+        return false;
+      },
+    };
+
+    let backButton = new Button(
+      400,
+      450,
+      160,
+      90,
+      "public/theme/return2.png",
+      this.game,
+      () => {
+        this.game.changeLevel(0);
+      }
+    );
+
+    this.game.addSprite(myBackground);
+    this.game.addSprite(tutorialTitle);
+    this.game.addSprite(controlsText);
+    this.game.addSprite(enemyText);
+    this.game.addSprite(backButton);
+  }
+}
+
+class Button extends Sprite {
+  constructor(x, y, width, height, image, game, onClick) {
+    super();
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.image = new Image();
+    this.image.src = image;
+    this.game = game;
+    this.onClick = onClick;
+    this.isHovered = false;
+  }
+
+  update(sprites, keys) {
+    const mouse = this.game.mouse;
+    this.isHovered =
+      mouse.x >= this.x &&
+      mouse.x <= this.x + this.width &&
+      mouse.y >= this.y &&
+      mouse.y <= this.y + this.height;
+
+    if (this.isHovered && mouse.clicked) {
+      mouse.clicked = false;
+
+      if (this.onClick) {
+        this.onClick();
+      }
+    }
+
+    return false;
+  }
+
+  draw(ctx) {
+    if (this.isHovered) {
+      ctx.globalAlpha = 0.8;
+    }
+    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    ctx.globalAlpha = 1.0;
+  }
+}
+
+class GameTitle extends Sprite {
+  constructor(x, y, width, height, image) {
+    super();
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.image = new Image();
+    this.image.src = image;
+  }
+
+  update(sprites, keys) {
+    return false;
+  }
+
+  draw(ctx) {
+    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+  }
+}
+
 class Hero extends Sprite {
   constructor(x, y, game) {
     super();
@@ -252,21 +541,25 @@ class Hero extends Sprite {
 }
 
 class Background extends Sprite {
-  constructor(x, y, width, height) {
+  constructor(x, y, width, height, image) {
     super();
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
     this.image = new Image();
-    this.image.src = "public/background/platformer_background_1.png";
+    this.image.src = image;
     this.speed = 0.5;
   }
 
   update() {
-    this.x -= this.speed;
-    if (this.x <= -this.width) {
-      this.x = 0;
+    if (this.image == "public/background/platformer_background_1.png") {
+      this.x -= this.speed;
+      if (this.x <= -this.width) {
+        this.x = 0;
+      }
+    } else {
+      return;
     }
   }
 
@@ -890,7 +1183,7 @@ class Score extends Sprite {
     this.score = 0;
     this.color = "#FF69B4";
     this.fontSize = 24;
-    this.font = this.fontSize + "px 'FreePixel'";
+    this.font = this.fontSize + "px 'boorsok'";
     this.x = 20;
     this.y = 35;
   }
@@ -909,7 +1202,7 @@ class Score extends Sprite {
     ctx.font = this.font;
     ctx.fillStyle = this.color;
 
-    ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
+    ctx.shadowColor = "rgb(0, 0, 0)";
     ctx.shadowBlur = 3;
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
@@ -921,25 +1214,9 @@ class Score extends Sprite {
 }
 
 let myGame = new Game();
-let myBackground = new Background(
-  0,
-  0,
-  myGame.canvas.width,
-  myGame.canvas.height
-);
-let myHero = new Hero(100, 410, myGame);
-let myEnemyGenerator = new EnemyGenerator(
-  100,
-  myGame.canvas.width,
-  myGame.canvas.height,
-  myGame
-);
-let myLives = new Lives(myGame);
-let myScore = new Score(myGame);
 
-myGame.addSprite(myBackground);
-myGame.addSprite(myHero);
-myGame.addSprite(myEnemyGenerator);
-myGame.addSprite(myLives);
-myGame.addSprite(myScore);
+myGame.addLevel(new Menu(myGame));
+myGame.addLevel(new Level1(myGame));
+myGame.addLevel(new Tutorial(myGame));
+
 myGame.animate();
