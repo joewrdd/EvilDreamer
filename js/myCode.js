@@ -606,7 +606,8 @@ class Rock extends Sprite {
       if (
         (sprite instanceof EnemyEasy && !sprite.isDead) ||
         (sprite instanceof FlyingEnemy && !sprite.isDead) ||
-        (sprite instanceof FlyingEnemyBullet && !sprite.isRemoved)
+        (sprite instanceof FlyingEnemyBullet && !sprite.isRemoved) ||
+        (sprite instanceof Boss1Enemy && !sprite.isDead)
       ) {
         let scoreSprite = sprites.find((sprite) => sprite instanceof Score);
         if (checkCollision(this, sprite)) {
@@ -618,6 +619,21 @@ class Rock extends Sprite {
             sprite.isDead = true;
             sprite.setState("dead");
             scoreSprite.addScore(2);
+          } else if (sprite instanceof Boss1Enemy) {
+            sprite.health -= 1;
+            if (sprite.health <= 0) {
+              sprite.isDead = true;
+              sprite.setState("dead");
+              scoreSprite.addScore(15);
+              let bossDeathSound = new Audio("public/audio/bossDeath.mp3");
+              bossDeathSound.play();
+            } else {
+              if (sprite.health % 5 === 0) {
+                // TODO: Add Sound
+                let bossHitSound = new Audio("public/audio/boss-hit.mp3");
+                bossHitSound.play();
+              }
+            }
           } else {
             sprite.isRemoved = true;
           }
@@ -856,7 +872,6 @@ class FlyingEnemyBullet extends Sprite {
   }
 }
 
-/*
 class Boss1Enemy extends Sprite {
   constructor(x, y, width, height, speed) {
     super();
@@ -868,23 +883,74 @@ class Boss1Enemy extends Sprite {
     this.isDead = false;
     this.isRemoved = false;
     this.states = {
-      walking: new SpriteSheet("public/boss1/boss1Walk.png", 494, 123, 4),
-      shooting: new SpriteSheet("public/boss1/boss1Attack.png", 497, 157, 3),
-      dead: new SpriteSheet("public/enemy/enemyEasyDead.png", 288, 66, 4),
+      walking: new SpriteSheet(
+        "public/bossDragon/bossWalkDragon.png",
+        1290,
+        258,
+        5
+      ),
+      shooting: new SpriteSheet(
+        "public/bossDragon/bossAttackDragon.png",
+        1032,
+        258,
+        4
+      ),
+      dead: new SpriteSheet(
+        "public/bossDragon/bossDeathDragon.png",
+        1290,
+        258,
+        5
+      ),
+      idle: new SpriteSheet(
+        "public/bossDragon/bossIdleDragon.png",
+        774,
+        258,
+        3
+      ),
     };
     this.currentState = "walking";
+    this.initialX = x;
+    this.walkDistance = 250;
+    this.attackCooldown = 0;
+    this.attackInterval = 400;
+    this.health = 100;
+    this.maxHealth = 100;
+    this.game = null;
+    this.hitFlashTimer = 0;
+    this.flameSpawnTimer = 0;
+    this.flameSpawnInterval = 15;
+    this.flameSpawnPositions = [100, 300, 500];
+    this.currentFlamePosition = 0;
+    this.hasSpawnedFlame = false;
   }
 
   setState(state) {
     if (this.currentState !== state) {
       this.currentState = state;
       this.states[state].reset();
+
+      if (state === "shooting") {
+        this.flameSpawnTimer = 0;
+        this.hasSpawnedFlame = false;
+      }
     }
   }
 
   update(sprites, keys) {
-    this.x += this.speed;
     this.states[this.currentState].update();
+
+    if (!this.game) {
+      for (let i = 0; i < sprites.length; i++) {
+        if (sprites[i] instanceof Hero) {
+          this.game = sprites[i].game;
+          break;
+        }
+      }
+    }
+
+    if (this.hitFlashTimer > 0) {
+      this.hitFlashTimer--;
+    }
 
     if (
       this.x < -this.width ||
@@ -899,6 +965,35 @@ class Boss1Enemy extends Sprite {
       return false;
     }
 
+    if (this.currentState === "walking") {
+      this.x += this.speed;
+
+      if (this.initialX - this.x >= this.walkDistance) {
+        this.setState("idle");
+      }
+    } else if (this.currentState === "idle") {
+      if (this.attackCooldown > 0) {
+        this.attackCooldown--;
+      } else {
+        this.setState("shooting");
+        this.attackCooldown = this.attackInterval;
+      }
+    } else if (this.currentState === "shooting") {
+      if (this.game && this.flameSpawnTimer <= 0 && !this.hasSpawnedFlame) {
+        this.spawnSkyFlame();
+        this.hasSpawnedFlame = true;
+      } else {
+        this.flameSpawnTimer--;
+      }
+
+      if (
+        this.states[this.currentState].frameIndex ===
+        this.states[this.currentState].frames - 1
+      ) {
+        this.setState("idle");
+      }
+    }
+
     for (let i = 0; i < sprites.length; i++) {
       let sprite = sprites[i];
       if (
@@ -906,20 +1001,81 @@ class Boss1Enemy extends Sprite {
         !sprite.isRemoved &&
         checkCollision(this, sprite)
       ) {
-        this.isDead = true;
-        this.setState("dead");
+        this.hitFlashTimer = 10;
         sprite.isRemoved = true;
-        break;
+      }
+
+      if (
+        sprite instanceof Hero &&
+        sprite.isAlive &&
+        checkCollision(this, sprite)
+      ) {
+        sprite.isAlive = false;
+        sprite.setState("dead");
       }
     }
 
     return false;
   }
 
-  draw(ctx) {
-    this.states[this.currentState].draw(ctx, this.x, this.y);
+  spawnSkyFlame() {
+    if (!this.game) return;
+
+    const spawnX = this.flameSpawnPositions[this.currentFlamePosition];
+
+    this.currentFlamePosition =
+      (this.currentFlamePosition + 1) % this.flameSpawnPositions.length;
+
+    this.game.addSprite(new SkyFlame(spawnX, 0, 143, 75, 1.5));
+
+    // TODO: Add Sound
+    let flameSound = new Audio("public/audio/flame.mp3");
+    flameSound.volume = 0.3;
+    flameSound.play();
   }
-} */
+
+  draw(ctx) {
+    if (this.hitFlashTimer > 0) {
+      ctx.globalAlpha = 0.7;
+      ctx.globalCompositeOperation = "lighter";
+      this.states[this.currentState].draw(ctx, this.x, this.y);
+      ctx.globalAlpha = 1.0;
+      ctx.globalCompositeOperation = "source-over";
+    } else {
+      this.states[this.currentState].draw(ctx, this.x, this.y);
+    }
+
+    if (!this.isDead) {
+      const barWidth = 400;
+      const barHeight = 30;
+      const healthPercent = this.health / this.maxHealth;
+
+      const barX = this.game.canvas.width / 2 - barWidth / 2;
+      const barY = 20;
+
+      ctx.shadowColor = "black";
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+
+      ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+      ctx.fillRect(barX, barY, barWidth, barHeight);
+      ctx.fillStyle = "#FF69B4";
+      ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight);
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(barX, barY, barWidth, barHeight);
+
+      ctx.font = "20px 'boorsok'";
+      ctx.fillStyle = "#FF69B4";
+      ctx.textAlign = "right";
+      ctx.fillText("BOSS 1 ", barX - 10, barY + 22);
+
+      ctx.shadowBlur = 0;
+      ctx.textAlign = "left";
+    }
+  }
+}
 
 class CloudPlatform extends Sprite {
   constructor(x, y, speed, game) {
@@ -1035,33 +1191,82 @@ class EnemyGenerator extends Sprite {
       { x: canvasWidth, y: 250, speed: -1.25 },
       { x: canvasWidth + 300, y: 250, speed: -1.2 },
     ];
-    //  this.bossSpawnPoints = [{ x: canvasWidth, y: 320, speed: -0.2 }];
+    this.bossSpawnPoint = { x: canvasWidth, y: 250, speed: -0.3 };
     this.currentGroundPoint = 0;
     this.currentAirPoint = 0;
-    //  this.currentBossPoint = 0;
     this.spawnCounter = 0;
     this.cloudPlatformTimer = 600;
+    this.isBossFight = false;
+    this.bossSpawned = false;
+    this.clearEnemiesTimer = 0;
   }
 
   update(sprites, keys) {
-    this.counter++;
-    if (this.counter >= this.spawnInterval) {
-      this.counter = 0;
-      this.spawnCounter++;
+    let scoreSprite = sprites.find((sprite) => sprite instanceof Score);
+    let score = scoreSprite ? scoreSprite.score : 0;
 
-      this.spawnGroundEnemy();
+    if (score >= 5 && !this.bossSpawned) {
+      this.isBossFight = true;
+      this.bossSpawned = true;
+      this.clearEnemiesTimer = 180;
 
-      if (this.spawnCounter % 2 == 0) {
-        this.spawnFlyingEnemy();
-      }
+      let bossWarningSound = new Audio("public/audio/boss-warning.mp3");
+      bossWarningSound.play();
 
-      //   this.spawnBossEnemy();
+      return false;
     }
 
-    this.cloudPlatformTimer--;
-    if (this.cloudPlatformTimer <= 0) {
-      this.spawnCloudPlatform();
-      this.cloudPlatformTimer = 900 + Math.floor(Math.random() * 900);
+    if (this.isBossFight && this.clearEnemiesTimer > 0) {
+      this.clearEnemiesTimer--;
+
+      if (this.clearEnemiesTimer === 0) {
+        for (let i = 0; i < sprites.length; i++) {
+          if (
+            sprites[i] instanceof EnemyEasy ||
+            sprites[i] instanceof FlyingEnemy ||
+            sprites[i] instanceof FlyingEnemyBullet ||
+            sprites[i] instanceof CloudPlatform
+          ) {
+            sprites[i].isRemoved = true;
+          }
+        }
+
+        this.game.addSprite(
+          new Boss1Enemy(
+            this.bossSpawnPoint.x,
+            this.bossSpawnPoint.y,
+            1290,
+            258,
+            this.bossSpawnPoint.speed
+          )
+        );
+
+        let bossMusic = new Audio("public/audio/boss-music.mp3");
+        bossMusic.loop = true;
+        bossMusic.play();
+      }
+
+      return false;
+    }
+
+    if (!this.isBossFight) {
+      this.counter++;
+      if (this.counter >= this.spawnInterval) {
+        this.counter = 0;
+        this.spawnCounter++;
+
+        this.spawnGroundEnemy();
+
+        if (this.spawnCounter % 2 == 0) {
+          this.spawnFlyingEnemy();
+        }
+      }
+
+      this.cloudPlatformTimer--;
+      if (this.cloudPlatformTimer <= 0) {
+        this.spawnCloudPlatform();
+        this.cloudPlatformTimer = 900 + Math.floor(Math.random() * 900);
+      }
     }
 
     return false;
@@ -1098,22 +1303,6 @@ class EnemyGenerator extends Sprite {
       new CloudPlatform(this.canvasWidth, yPosition, -1, this.game)
     );
   }
-  /*
-  spawnBossEnemy() {
-    let scoreSprite = this.game.sprites.find(
-      (sprite) => sprite instanceof Score
-    );
-    let score = scoreSprite ? scoreSprite.score : 0;
-
-    if (score > 0 && score % 20 === 0) {
-      let spawnPoint = this.bossSpawnPoints[this.currentBossPoint];
-      this.game.addSprite(
-        new Boss1Enemy(spawnPoint.x, spawnPoint.y, 123, 123, spawnPoint.speed)
-      );
-      this.currentBossPoint =
-        (this.currentBossPoint + 1) % this.bossSpawnPoints.length;
-    }
-  } */
 
   draw(ctx) {}
 }
@@ -1197,8 +1386,6 @@ class Score extends Sprite {
   }
 
   draw(ctx) {
-    ctx.save();
-
     ctx.font = this.font;
     ctx.fillStyle = this.color;
 
@@ -1209,7 +1396,55 @@ class Score extends Sprite {
 
     ctx.fillText("SCORE: " + this.score, this.x, this.y);
 
-    ctx.restore();
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+  }
+}
+
+class SkyFlame extends Sprite {
+  constructor(x, y, width, height, speed) {
+    super();
+    this.x = x;
+    this.y = y;
+    this.width = 143;
+    this.height = 75;
+    this.speedY = speed;
+    this.image = new Image();
+    this.image.src = "public/bossDragon/randomskyflames.png";
+    this.isRemoved = false;
+  }
+
+  update(sprites, keys) {
+    if (this.isRemoved) {
+      return true;
+    }
+
+    this.y += this.speedY;
+
+    if (this.y > 540) {
+      return true;
+    }
+
+    for (let i = 0; i < sprites.length; i++) {
+      let sprite = sprites[i];
+      if (sprite instanceof Hero && sprite.isAlive) {
+        if (checkCollision(this, sprite)) {
+          sprite.isAlive = false;
+          sprite.setState("dead");
+          this.isRemoved = true;
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  draw(ctx) {
+    if (!this.isRemoved) {
+      ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    }
   }
 }
 
