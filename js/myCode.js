@@ -86,7 +86,7 @@ class Menu extends Level {
       "public/theme/tutorial.png",
       this.game,
       () => {
-        this.game.changeLevel(2);
+        this.game.changeLevel(3);
       }
     );
 
@@ -135,7 +135,30 @@ class Level2 extends Level {
     this.game = game;
   }
 
-  init() {}
+  init() {
+    let myBackground = new Background(
+      0,
+      0,
+      this.game.canvas.width,
+      this.game.canvas.height,
+      "public/background/platformer_background_1.png"
+    );
+    let myHero = new Hero(100, 410, this.game);
+    let myEnemyGenerator2 = new EnemyGenerator2(
+      80,
+      this.game.canvas.width,
+      this.game.canvas.height,
+      this.game
+    );
+    let myLives = new Lives(this.game);
+    let myScore = new Score(this.game);
+
+    this.game.addSprite(myBackground);
+    this.game.addSprite(myHero);
+    this.game.addSprite(myEnemyGenerator2);
+    this.game.addSprite(myLives);
+    this.game.addSprite(myScore);
+  }
 }
 
 class Tutorial extends Level {
@@ -1015,6 +1038,15 @@ class Boss1Enemy extends Sprite {
       }
     }
 
+    if (
+      this.isBossFight &&
+      this.bossSpawned &&
+      this.game.levelIndex === 1 &&
+      !this.game.sprites.some((sprite) => sprite instanceof Boss1Enemy)
+    ) {
+      this.game.changeLevel(2);
+    }
+
     return false;
   }
 
@@ -1073,6 +1105,211 @@ class Boss1Enemy extends Sprite {
 
       ctx.shadowBlur = 0;
       ctx.textAlign = "left";
+    }
+  }
+}
+
+class Boss2Enemy extends Sprite {
+  constructor(x, y, width, height, speed) {
+    super();
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.speed = speed;
+    this.isDead = false;
+    this.isRemoved = false;
+    this.states = {
+      walking: new SpriteSheet(
+        "public/bossDemonLord/bossDemonWalk.png",
+        1548,
+        258,
+        6
+      ),
+      shooting: new SpriteSheet(
+        "public/bossDemonLord/bossDemonAttack.png",
+        1032,
+        258,
+        4
+      ),
+      dead: new SpriteSheet(
+        "public/bossDemonLord/bossDemonDeath.png",
+        1548,
+        258,
+        6
+      ),
+      idle: new SpriteSheet(
+        "public/bossDemonLord/bossDemonIdle.png",
+        774,
+        258,
+        3
+      ),
+    };
+    this.currentState = "walking";
+    this.initialX = x;
+    this.walkDistance = 250;
+    this.attackCooldown = 0;
+    this.attackInterval = 400;
+    this.health = 200;
+    this.maxHealth = 200;
+    this.game = null;
+    this.laserSpawned = false;
+    this.laserY = this.y + 110;
+  }
+
+  setState(state) {
+    if (this.currentState !== state) {
+      this.currentState = state;
+      this.states[state].reset();
+      if (state === "shooting") {
+        this.laserSpawned = false;
+      }
+    }
+  }
+
+  update(sprites, keys) {
+    this.states[this.currentState].update();
+    if (!this.game) {
+      for (let i = 0; i < sprites.length; i++) {
+        if (sprites[i] instanceof Hero) {
+          this.game = sprites[i].game;
+          break;
+        }
+      }
+    }
+    if (
+      this.x < -this.width ||
+      (this.isDead &&
+        this.states[this.currentState].frameIndex ==
+          this.states[this.currentState].frames - 1)
+    ) {
+      return true;
+    }
+    if (this.isDead) {
+      return false;
+    }
+    if (this.currentState === "walking") {
+      this.x += this.speed;
+      if (this.initialX - this.x >= this.walkDistance) {
+        this.setState("idle");
+      }
+    } else if (this.currentState === "idle") {
+      if (this.attackCooldown > 0) {
+        this.attackCooldown--;
+      } else {
+        this.setState("shooting");
+        this.attackCooldown = this.attackInterval;
+      }
+    } else if (this.currentState === "shooting") {
+      if (!this.laserSpawned && this.game) {
+        this.spawnLaser();
+        this.laserSpawned = true;
+      }
+      if (
+        this.states[this.currentState].frameIndex ===
+        this.states[this.currentState].frames - 1
+      ) {
+        this.setState("idle");
+      }
+    }
+    for (let i = 0; i < sprites.length; i++) {
+      let sprite = sprites[i];
+      if (
+        sprite instanceof Rock &&
+        !sprite.isRemoved &&
+        checkCollision(this, sprite)
+      ) {
+        sprite.isRemoved = true;
+        this.health -= 1;
+        if (this.health <= 0) {
+          this.isDead = true;
+          this.setState("dead");
+        }
+      }
+      if (
+        sprite instanceof Hero &&
+        sprite.isAlive &&
+        checkCollision(this, sprite)
+      ) {
+        sprite.isAlive = false;
+        sprite.setState("dead");
+      }
+    }
+    return false;
+  }
+
+  spawnLaser() {
+    const laserX = this.x - 240 + 120;
+    const laserY = this.y + 90;
+    this.game.addSprite(new Boss2Laser(laserX, laserY, 240, 138, -1));
+    let laserSound = new Audio("public/audio/laser.mp3");
+    laserSound.volume = 0.4;
+    laserSound.play();
+  }
+
+  draw(ctx) {
+    this.states[this.currentState].draw(ctx, this.x, this.y);
+    if (!this.isDead) {
+      const barWidth = 400;
+      const barHeight = 30;
+      const healthPercent = this.health / this.maxHealth;
+      const barX = this.game.canvas.width / 2 - barWidth / 2;
+      const barY = 60;
+      ctx.shadowColor = "black";
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+      ctx.fillRect(barX, barY, barWidth, barHeight);
+      ctx.fillStyle = "#FF69B4";
+      ctx.fillRect(barX, barY, barWidth * healthPercent, barHeight);
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(barX, barY, barWidth, barHeight);
+      ctx.font = "20px 'boorsok'";
+      ctx.fillStyle = "#FF69B4";
+      ctx.textAlign = "right";
+      ctx.fillText("BOSS 2", barX - 10, barY + 22);
+      ctx.shadowBlur = 0;
+      ctx.textAlign = "left";
+    }
+  }
+}
+
+class Boss2Laser extends Sprite {
+  constructor(x, y, width, height, speed) {
+    super();
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.speedX = speed;
+    this.image = new Image();
+    this.image.src = "public/bossDemonLord/demonLaser.png";
+    this.isRemoved = false;
+  }
+
+  update(sprites, keys) {
+    if (this.isRemoved) return true;
+    this.x += this.speedX;
+    if (this.x > 960) return true;
+    for (let i = 0; i < sprites.length; i++) {
+      let sprite = sprites[i];
+      if (sprite instanceof Hero && sprite.isAlive) {
+        if (checkCollision(this, sprite)) {
+          sprite.isAlive = false;
+          sprite.setState("dead");
+          this.isRemoved = true;
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  draw(ctx) {
+    if (!this.isRemoved) {
+      ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
     }
   }
 }
@@ -1176,7 +1413,7 @@ class CloudPlatform extends Sprite {
 class EnemyGenerator extends Sprite {
   constructor(spawnInterval, canvasWidth, canvasHeight, game) {
     super();
-    this.spawnInterval = spawnInterval;
+    this.spawnInterval = 240;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
     this.counter = 0;
@@ -1269,6 +1506,15 @@ class EnemyGenerator extends Sprite {
       }
     }
 
+    if (
+      this.isBossFight &&
+      this.bossSpawned &&
+      this.game.levelIndex === 1 &&
+      !this.game.sprites.some((sprite) => sprite instanceof Boss1Enemy)
+    ) {
+      this.game.changeLevel(2);
+    }
+
     return false;
   }
 
@@ -1305,6 +1551,143 @@ class EnemyGenerator extends Sprite {
   }
 
   draw(ctx) {}
+}
+
+class EnemyGenerator2 extends Sprite {
+  constructor(spawnInterval, canvasWidth, canvasHeight, game) {
+    super();
+    this.spawnInterval = 160;
+    this.canvasWidth = canvasWidth;
+    this.canvasHeight = canvasHeight;
+    this.counter = 0;
+    this.game = game;
+    this.groundSpawnPoints = [
+      { x: canvasWidth, y: 410, speed: -1.3 },
+      { x: canvasWidth, y: 410, speed: -1.5 },
+      { x: canvasWidth + 1000, y: 410, speed: -1.7 },
+    ];
+    this.airSpawnPoints = [
+      { x: canvasWidth, y: 120, speed: -1.5 },
+      { x: canvasWidth, y: 200, speed: -1.7 },
+      { x: canvasWidth + 300, y: 250, speed: -1.6 },
+    ];
+    this.bossSpawnPoint = { x: canvasWidth, y: 260, speed: -0.5 };
+    this.currentGroundPoint = 0;
+    this.currentAirPoint = 0;
+    this.spawnCounter = 0;
+    this.isBossFight = false;
+    this.bossSpawned = false;
+    this.clearEnemiesTimer = 0;
+    this.bossWarningText = null;
+  }
+
+  update(sprites, keys) {
+    let scoreSprite = sprites.find((sprite) => sprite instanceof Score);
+    let score = scoreSprite ? scoreSprite.score : 0;
+
+    if (score >= 10 && !this.bossSpawned) {
+      this.isBossFight = true;
+      this.bossSpawned = true;
+      this.clearEnemiesTimer = 400;
+
+      let bossWarningSound = new Audio("public/audio/boss-warning.mp3");
+      bossWarningSound.play();
+      this.bossWarningText = {
+        text: "DEMON LORD APPROACHES!",
+        x: this.game.canvas.width / 2,
+        y: this.game.canvas.height / 2 - 50,
+        font: "50px 'boorsok'",
+        color: "#FF69B4",
+        draw: function (ctx) {
+          ctx.save();
+          ctx.font = this.font;
+          ctx.fillStyle = this.color;
+          ctx.textAlign = "center";
+          ctx.shadowColor = "black";
+          ctx.shadowBlur = 10;
+          ctx.shadowOffsetX = 3;
+          ctx.shadowOffsetY = 3;
+          ctx.fillText(this.text, this.x, this.y);
+          ctx.restore();
+        },
+      };
+      return false;
+    }
+
+    if (this.isBossFight && this.clearEnemiesTimer > 0) {
+      this.clearEnemiesTimer--;
+      if (this.clearEnemiesTimer === 0) {
+        for (let i = 0; i < sprites.length; i++) {
+          if (
+            sprites[i] instanceof EnemyEasy ||
+            sprites[i] instanceof FlyingEnemy ||
+            sprites[i] instanceof FlyingEnemyBullet ||
+            sprites[i] instanceof CloudPlatform
+          ) {
+            sprites[i].isRemoved = true;
+          }
+        }
+        this.game.addSprite(
+          new Boss2Enemy(
+            this.bossSpawnPoint.x,
+            this.bossSpawnPoint.y,
+            1548,
+            258,
+            this.bossSpawnPoint.speed
+          )
+        );
+        let bossMusic = new Audio("public/audio/boss-music.mp3");
+        bossMusic.loop = true;
+        bossMusic.play();
+        this.bossWarningText = null;
+      }
+      return false;
+    }
+
+    if (!this.isBossFight) {
+      this.counter++;
+      if (this.counter >= this.spawnInterval) {
+        this.counter = 0;
+        this.spawnCounter++;
+        this.spawnGroundEnemy();
+        if (this.spawnCounter % 2 === 0) {
+          this.spawnFlyingEnemy();
+        }
+      }
+    }
+    return false;
+  }
+
+  spawnGroundEnemy() {
+    let spawnPoint = this.groundSpawnPoints[this.currentGroundPoint];
+    this.game.addSprite(
+      new EnemyEasy(spawnPoint.x, spawnPoint.y, 32, 32, spawnPoint.speed)
+    );
+    this.currentGroundPoint =
+      (this.currentGroundPoint + 1) % this.groundSpawnPoints.length;
+  }
+
+  spawnFlyingEnemy() {
+    let spawnPoint = this.airSpawnPoints[this.currentAirPoint];
+    this.game.addSprite(
+      new FlyingEnemy(
+        spawnPoint.x,
+        spawnPoint.y,
+        39.5,
+        16,
+        spawnPoint.speed,
+        this.game
+      )
+    );
+    this.currentAirPoint =
+      (this.currentAirPoint + 1) % this.airSpawnPoints.length;
+  }
+
+  draw(ctx) {
+    if (this.bossWarningText) {
+      this.bossWarningText.draw(ctx);
+    }
+  }
 }
 
 class Lives extends Sprite {
@@ -1452,6 +1835,7 @@ let myGame = new Game();
 
 myGame.addLevel(new Menu(myGame));
 myGame.addLevel(new Level1(myGame));
+myGame.addLevel(new Level2(myGame));
 myGame.addLevel(new Tutorial(myGame));
 
 myGame.animate();
