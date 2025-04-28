@@ -1254,7 +1254,7 @@ class Boss2Enemy extends Sprite {
       const barHeight = 30;
       const healthPercent = this.health / this.maxHealth;
       const barX = this.game.canvas.width / 2 - barWidth / 2;
-      const barY = 60;
+      const barY = 20;
       ctx.shadowColor = "black";
       ctx.shadowBlur = 10;
       ctx.shadowOffsetX = 0;
