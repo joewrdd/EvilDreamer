@@ -23,6 +23,8 @@ class Game {
     this.levelIndex = 0;
     this.levels = [];
     this.pendingLevel = null;
+    this.paused = false;
+    this.restart = false;
     this.mouse = { x: 0, y: 0, clicked: false };
     this.bindMouseEvents();
     this.bindKeyboardEvents();
@@ -32,16 +34,20 @@ class Game {
     this.sprites.push(sprite);
   }
   update() {
+    if (this.restart) {
+      this.restart = false;
+      this.paused = false;
+      this.setLevel(this.levelIndex);
+    }
+    if (this.paused) return;
     let updatedSprites = [];
     for (let i = 0; i < this.sprites.length; i++) {
       let sprite = this.sprites[i];
-
       if (!sprite.update(this.sprites, this.keys)) {
         updatedSprites.push(sprite);
       }
     }
     this.sprites = updatedSprites;
-
     if (this.pendingLevel !== null) {
       this.setLevel(this.pendingLevel);
       this.pendingLevel = null;
@@ -51,6 +57,33 @@ class Game {
   draw() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.sprites.forEach((sprite) => sprite.draw(this.ctx));
+    if (this.paused) {
+      this.ctx.save();
+      this.ctx.globalAlpha = 0.7;
+      this.ctx.fillStyle = "#000";
+      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      this.ctx.globalAlpha = 1.0;
+      this.ctx.fillStyle = "#fff";
+      this.ctx.font = "40px 'boorsok', Arial";
+      this.ctx.textAlign = "center";
+      this.ctx.fillText(
+        "PAUSED",
+        this.canvas.width / 2,
+        this.canvas.height / 2 - 20
+      );
+      this.ctx.font = "24px 'boorsok', Arial";
+      this.ctx.fillText(
+        "Press C To Continue",
+        this.canvas.width / 2,
+        this.canvas.height / 2 + 30
+      );
+      this.ctx.fillText(
+        "Press R To Restart",
+        this.canvas.width / 2,
+        this.canvas.height / 2 + 60
+      );
+      this.ctx.restore();
+    }
   }
 
   animate() {
@@ -93,6 +126,15 @@ class Game {
   bindKeyboardEvents() {
     window.addEventListener("keydown", (e) => {
       this.keys[e.key] = true;
+      if (e.key === "p" || e.key === "P") {
+        this.paused = true;
+      }
+      if (e.key === "c" || e.key === "C") {
+        this.paused = false;
+      }
+      if (e.key === "r" || e.key === "R") {
+        this.restart = true;
+      }
     });
 
     window.addEventListener("keyup", (e) => {

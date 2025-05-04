@@ -190,36 +190,35 @@ class Tutorial extends Level {
         { key: "SPACE", action: "Jump" },
         { key: "UP ARROW", action: "Shoot" },
         { key: "GOAL", action: "Defeat Enemies & Survive!" },
+        { key: "P", action: "Pause the Game" },
+        { key: "C", action: "Continue (Unpause)" },
+        { key: "R", action: "Restart Level" },
       ],
-      x: 300,
-      y: 160,
-      lineHeight: 40,
-      keyFont: "28px 'boorsok'",
-      actionFont: "20px 'boorsok'",
+      x: 220,
+      y: 140,
+      lineHeight: 24,
+      keyFont: "16px 'boorsok'",
+      actionFont: "13px 'boorsok'",
       keyColor: "#FF69B4",
       actionColor: "#FFFFFF",
       draw: function (ctx) {
         ctx.save();
-
         for (let i = 0; i < this.items.length; i++) {
           const item = this.items[i];
           const yPos = this.y + i * this.lineHeight;
-
           ctx.font = this.keyFont;
           ctx.fillStyle = this.keyColor;
           ctx.textAlign = "right";
           ctx.shadowColor = "rgb(0, 0, 0)";
-          ctx.shadowBlur = 3;
-          ctx.shadowOffsetX = 2;
-          ctx.shadowOffsetY = 2;
+          ctx.shadowBlur = 2;
+          ctx.shadowOffsetX = 1;
+          ctx.shadowOffsetY = 1;
           ctx.fillText(item.key, this.x, yPos);
-
           ctx.font = this.actionFont;
           ctx.fillStyle = this.actionColor;
           ctx.textAlign = "left";
           ctx.fillText(" - " + item.action, this.x + 10, yPos);
         }
-
         ctx.restore();
       },
       update: function () {
@@ -232,43 +231,78 @@ class Tutorial extends Level {
       items: [
         { name: "Ground Enemy", desc: "Can Be Jumped On or Shot" },
         { name: "Flying Enemy", desc: "Shoots Bullets, Must Be Shot" },
+        { name: "Boss 1 (The Dragon) ", desc: "Shoots Raining Flames" },
+        {
+          name: "Boss 2 (The Demon Lord)",
+          desc: "Shoots Long Laser That Can't Be Avoided Easily",
+        },
         {
           name: "Cloud Platform",
           desc: "Shoots in All Directions When Activated",
         },
+        { name: "Stair Platform", desc: "Collect Key & Gain Longer Jumps" },
       ],
-      x: 300,
-      y: 320,
-      lineHeight: 35,
-      titleFont: "28px 'boorsok'",
-      itemFont: "20px 'boorsok'",
+      x: 220,
+      y:
+        controlsText.y +
+        controlsText.items.length * controlsText.lineHeight +
+        20,
+      lineHeight: 20,
+      titleFont: "18px 'boorsok'",
+      itemFont: "13px 'boorsok'",
       titleColor: "#FF69B4",
       nameColor: "#0CC0DF",
       descColor: "#FFFFFF",
       draw: function (ctx) {
         ctx.save();
-
         ctx.font = this.titleFont;
         ctx.fillStyle = this.titleColor;
         ctx.textAlign = "left";
         ctx.shadowColor = "rgb(0, 0, 0)";
-        ctx.shadowBlur = 3;
-        ctx.shadowOffsetX = 2;
-        ctx.shadowOffsetY = 2;
+        ctx.shadowBlur = 2;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
         ctx.fillText(this.title, this.x, this.y);
-
         for (let i = 0; i < this.items.length; i++) {
           const item = this.items[i];
-          const yPos = this.y + 30 + i * this.lineHeight;
-
+          const yPos = this.y + 35 + i * this.lineHeight;
           ctx.font = this.itemFont;
           ctx.fillStyle = this.nameColor;
-          ctx.fillText("• " + item.name + ":", this.x, yPos);
-
+          const nameText = "• " + item.name + ":";
+          ctx.fillText(nameText, this.x, yPos);
+          const nameWidth = ctx.measureText(nameText).width;
           ctx.fillStyle = this.descColor;
-          ctx.fillText(" " + item.desc, this.x + 180, yPos);
+          ctx.fillText(item.desc, this.x + nameWidth + 10, yPos);
         }
+        ctx.restore();
+      },
+      update: function () {
+        return false;
+      },
+    };
 
+    let winText = {
+      x: 220,
+      y: enemyText.y + enemyText.items.length * enemyText.lineHeight + 30,
+      draw: function (ctx) {
+        ctx.save();
+        ctx.font = "14px 'boorsok'";
+        ctx.fillStyle = "#FF69B4";
+        ctx.textAlign = "left";
+        ctx.shadowColor = "rgb(0, 0, 0)";
+        ctx.shadowBlur = 2;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
+        ctx.fillText(
+          "To win Level 2: Collect the key to gain Long Jump power,",
+          this.x,
+          this.y
+        );
+        ctx.fillText(
+          "then use it to defeat Boss 2 and complete the game!",
+          this.x,
+          this.y + 18
+        );
         ctx.restore();
       },
       update: function () {
@@ -277,7 +311,7 @@ class Tutorial extends Level {
     };
 
     let backButton = new Button(
-      400,
+      720,
       450,
       160,
       90,
@@ -292,6 +326,7 @@ class Tutorial extends Level {
     this.game.addSprite(tutorialTitle);
     this.game.addSprite(controlsText);
     this.game.addSprite(enemyText);
+    this.game.addSprite(winText);
     this.game.addSprite(backButton);
   }
 }
@@ -379,6 +414,7 @@ class Hero extends Sprite {
     this.hurtTimer = 0;
     this.isHurt = false;
     this.jumpKillCooldown = 0;
+    this.hasLongJump = false;
 
     this.states = {
       idle: new SpriteSheet("public/hero/Pink_Monster_Idle_4.png", 128, 33, 4),
@@ -402,6 +438,12 @@ class Hero extends Sprite {
       ),
       hurt: new SpriteSheet("public/hero/Pink_Monster_Hurt_4.png", 128, 33, 4),
       dead: new SpriteSheet("public/hero/Pink_Monster_Death_8.png", 256, 33, 8),
+      climb: new SpriteSheet(
+        "public/hero/Pink_Monster_Climb_4.png",
+        128,
+        32,
+        4
+      ),
     };
 
     this.currentState = "idle";
@@ -437,8 +479,10 @@ class Hero extends Sprite {
       this.jumpKillCooldown--;
     }
 
+    let jumpPower = this.hasLongJump ? -16 : this.jumpPower;
+    let moveSpeed = this.hasLongJump ? 3 : this.speed;
     if (keys[" "] && this.grounded) {
-      this.verticalSpeed = this.jumpPower;
+      this.verticalSpeed = jumpPower;
       this.grounded = false;
       this.isJumping = true;
       let jumpSound = new Audio("public/audio/jump.mp3");
@@ -511,10 +555,10 @@ class Hero extends Sprite {
     this.states[this.currentState].update();
 
     if (keys["ArrowLeft"] || keys["a"]) {
-      this.x -= this.speed;
+      this.x -= moveSpeed;
     }
     if (keys["ArrowRight"] || keys["d"]) {
-      this.x += this.speed;
+      this.x += moveSpeed;
     }
 
     for (let i = 0; i < sprites.length; i++) {
@@ -555,6 +599,60 @@ class Hero extends Sprite {
       }
     }
 
+    let ladder = sprites.find(
+      (sprite) =>
+        sprite instanceof PinkStair &&
+        this.x + this.width > sprite.x &&
+        this.x < sprite.x + sprite.width &&
+        this.y + this.height > sprite.y &&
+        this.y < sprite.y + sprite.height
+    );
+    let onStair = false;
+    if (ladder) {
+      let heroCenter = this.x + this.width / 2;
+      let ladderLeft = ladder.x + ladder.width / 3;
+      let ladderRight = ladder.x + (2 * ladder.width) / 3;
+      if (heroCenter > ladderLeft && heroCenter < ladderRight) {
+        onStair = true;
+      }
+    }
+
+    if (onStair && (keys["ArrowUp"] || keys["w"])) {
+      this.y -= this.speed;
+      this.verticalSpeed = 0;
+      this.setState("climb");
+    } else if (onStair && (keys["ArrowDown"] || keys["s"])) {
+      this.y += this.speed;
+      this.verticalSpeed = 0;
+      this.setState("climb");
+    }
+    if (
+      onStair &&
+      (keys["ArrowUp"] || keys["w"] || keys["ArrowDown"] || keys["s"])
+    ) {
+      this.verticalSpeed = 0;
+    }
+
+    let onFloorPlatform = false;
+    for (let i = 0; i < sprites.length; i++) {
+      let sprite = sprites[i];
+      if (sprite instanceof FloorPlatform) {
+        if (
+          this.y + this.height <= sprite.y + 5 &&
+          this.y + this.height + this.verticalSpeed >= sprite.y &&
+          this.x + this.width > sprite.x &&
+          this.x < sprite.x + sprite.width
+        ) {
+          this.y = sprite.y - this.height;
+          this.verticalSpeed = 0;
+          this.grounded = true;
+          this.isJumping = false;
+          onFloorPlatform = true;
+          break;
+        }
+      }
+    }
+
     return false;
   }
 
@@ -573,6 +671,23 @@ class Background extends Sprite {
     this.image = new Image();
     this.image.src = image;
     this.speed = 0.5;
+
+    if (image === "public/background/platformer_background_1.png") {
+      if (!Background.music) {
+        Background.music = new Audio("public/audio/bgMusic.mp3");
+        Background.music.loop = true;
+        Background.music.volume = 0.3;
+        Background.music.play();
+      } else if (Background.music.paused) {
+        Background.music.play();
+      }
+    } else {
+      if (Background.music) {
+        Background.music.pause();
+        Background.music.currentTime = 0;
+        Background.music = null;
+      }
+    }
   }
 
   update() {
@@ -1060,7 +1175,6 @@ class Boss1Enemy extends Sprite {
 
     this.game.addSprite(new SkyFlame(spawnX, 0, 143, 75, 1.5));
 
-    // TODO: Add Sound
     let flameSound = new Audio("public/audio/flame.mp3");
     flameSound.volume = 0.3;
     flameSound.play();
@@ -1119,6 +1233,7 @@ class Boss2Enemy extends Sprite {
     this.speed = speed;
     this.isDead = false;
     this.isRemoved = false;
+    this.hasDespawnedSpecial = false;
     this.states = {
       walking: new SpriteSheet(
         "public/bossDemonLord/bossDemonWalk.png",
@@ -1235,13 +1350,28 @@ class Boss2Enemy extends Sprite {
         sprite.setState("dead");
       }
     }
+
+    if (!this.hasDespawnedSpecial) {
+      this.hasDespawnedSpecial = true;
+
+      let platform = sprites.find((s) => s instanceof FloorPlatform);
+      let stairs = sprites.find((s) => s instanceof PinkStair);
+      let key = sprites.find(
+        (s) => s instanceof KeyCollectible && !s.collected
+      );
+
+      if (platform) platform.isRemoved = true;
+      if (stairs) stairs.isRemoved = true;
+      if (key) key.isRemoved = true;
+    }
+
     return false;
   }
 
   spawnLaser() {
     const laserX = this.x - 240 + 120;
     const laserY = this.y + 90;
-    this.game.addSprite(new Boss2Laser(laserX, laserY, 240, 138, -1));
+    this.game.addSprite(new Boss2Laser(laserX, laserY, 180, 100, -1));
     let laserSound = new Audio("public/audio/laser.mp3");
     laserSound.volume = 0.4;
     laserSound.play();
@@ -1281,8 +1411,8 @@ class Boss2Laser extends Sprite {
     super();
     this.x = x;
     this.y = y;
-    this.width = width;
-    this.height = height;
+    this.width = 180;
+    this.height = 100;
     this.speedX = speed;
     this.image = new Image();
     this.image.src = "public/bossDemonLord/demonLaser.png";
@@ -1579,13 +1709,39 @@ class EnemyGenerator2 extends Sprite {
     this.bossSpawned = false;
     this.clearEnemiesTimer = 0;
     this.bossWarningText = null;
+    this.specialSpawned = false;
   }
 
   update(sprites, keys) {
     let scoreSprite = sprites.find((sprite) => sprite instanceof Score);
     let score = scoreSprite ? scoreSprite.score : 0;
 
-    if (score >= 10 && !this.bossSpawned) {
+    if (!this.specialSpawned && score >= 15) {
+      this.specialSpawned = true;
+      let platformStartX = this.canvasWidth + 10;
+      let platformTargetX = 400;
+      let platformY = 225;
+      let platformSpeed = 0.5;
+      let platformWidth = 120;
+      let pinkStairOffsetX = 38;
+      let floorPlatform = new FloorPlatform(
+        platformStartX,
+        platformY,
+        platformTargetX,
+        platformSpeed
+      );
+      let pinkStair = new PinkStair(floorPlatform, pinkStairOffsetX);
+      let key = new KeyCollectible(
+        floorPlatform,
+        (platformWidth - 12) / 2,
+        this.game
+      );
+      this.game.addSprite(floorPlatform);
+      this.game.addSprite(pinkStair);
+      this.game.addSprite(key);
+    }
+
+    if (score >= 30 && !this.bossSpawned) {
       this.isBossFight = true;
       this.bossSpawned = true;
       this.clearEnemiesTimer = 400;
@@ -1694,20 +1850,18 @@ class Lives extends Sprite {
   constructor(game) {
     super();
     this.game = game;
-    this.lives = 5;
+    this.lives = 4;
     this.livesImages = {
-      5: new Image(),
       4: new Image(),
       3: new Image(),
       2: new Image(),
       1: new Image(),
       0: new Image(),
     };
-    this.livesImages[5].src = "public/lives/100-percent.png";
-    this.livesImages[4].src = "public/lives/75-percent.png";
-    this.livesImages[3].src = "public/lives/50-percent.png";
-    this.livesImages[2].src = "public/lives/25-percent.png";
-    this.livesImages[1].src = "public/lives/0-percent.png";
+    this.livesImages[4].src = "public/lives/100-percent.png";
+    this.livesImages[3].src = "public/lives/75-percent.png";
+    this.livesImages[2].src = "public/lives/50-percent.png";
+    this.livesImages[1].src = "public/lives/25-percent.png";
     this.livesImages[0].src = "public/lives/0-percent.png";
     this.width = 35;
     this.height = 35;
@@ -1827,6 +1981,110 @@ class SkyFlame extends Sprite {
   draw(ctx) {
     if (!this.isRemoved) {
       ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    }
+  }
+}
+
+class PinkStair extends Sprite {
+  constructor(platform, offsetX) {
+    super();
+    this.platform = platform;
+    this.offsetX = offsetX;
+    this.width = 44;
+    this.height = 97;
+    this.image = new Image();
+    this.image.src = "public/arc/pinkstairs.png";
+  }
+  update(sprites, keys) {
+    if (this.isRemoved) return true;
+    this.x = this.platform.x + this.offsetX;
+    this.y = this.platform.y + this.platform.height - 41;
+    return false;
+  }
+  draw(ctx) {
+    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+  }
+}
+
+class FloorPlatform extends Sprite {
+  constructor(startX, y, targetX, speed) {
+    super();
+    this.x = startX;
+    this.y = y;
+    this.targetX = targetX;
+    this.speed = speed;
+    this.width = 120;
+    this.height = 40;
+    this.image = new Image();
+    this.image.src = "public/arc/floorplatform.png";
+    this.hasArrived = false;
+  }
+  update(sprites, keys) {
+    if (this.isRemoved) return true;
+    if (!this.hasArrived) {
+      if (this.x > this.targetX) {
+        this.x -= this.speed;
+        if (this.x <= this.targetX) {
+          this.x = this.targetX;
+          this.hasArrived = true;
+        }
+      }
+    }
+    return false;
+  }
+  draw(ctx) {
+    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+  }
+}
+
+class KeyCollectible extends Sprite {
+  constructor(platform, offsetX, game) {
+    super();
+    this.platform = platform;
+    this.offsetX = offsetX;
+    this.game = game;
+    this.width = 18;
+    this.height = 18;
+    this.collected = false;
+    this.spriteSheet = new SpriteSheet(
+      "public/collectibles/key.png",
+      252,
+      18,
+      14
+    );
+  }
+
+  update(sprites, keys) {
+    this.x = this.platform.x + this.offsetX;
+    this.y = this.platform.y - this.height;
+    this.spriteSheet.update();
+    let hero = sprites.find((s) => s instanceof Hero && s.isAlive);
+    if (
+      hero &&
+      !this.collected &&
+      hero.x < this.x + this.width &&
+      hero.x + hero.width > this.x &&
+      hero.y < this.y + this.height &&
+      hero.y + hero.height > this.y
+    ) {
+      this.collected = true;
+      hero.hasLongJump = true;
+      this.platform.isRemoved = true;
+      let stairs = sprites.find((s) => s instanceof PinkStair);
+      if (stairs) stairs.isRemoved = true;
+
+      let keySound = new Audio("public/audio/key.mp3");
+      keySound.volume = 0.7;
+      keySound.play();
+
+      return true;
+    }
+    return false;
+  }
+
+  draw(ctx) {
+    if (!this.collected) {
+      this.spriteSheet.draw(ctx, this.x, this.y);
     }
   }
 }
