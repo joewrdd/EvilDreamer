@@ -1,3 +1,4 @@
+// Reusable SpriteSheet Class For All Sprites
 class SpriteSheet {
   constructor(src, width, height, frames) {
     this.image = new Image();
@@ -10,11 +11,13 @@ class SpriteSheet {
     this.timePerFrame = 60;
   }
 
+  // Reset Sprite Animation
   reset() {
     this.frameIndex = 0;
     this.lastUpdate = Date.now();
   }
 
+  // Update Sprite Animation
   update() {
     if (Date.now() - this.lastUpdate >= this.timePerFrame) {
       this.frameIndex = (this.frameIndex + 1) % this.frames;
@@ -22,6 +25,7 @@ class SpriteSheet {
     }
   }
 
+  // Draw Sprite On Canvas
   draw(ctx, x, y) {
     const frameWidth = this.width / this.frames;
     ctx.drawImage(
@@ -37,6 +41,8 @@ class SpriteSheet {
     );
   }
 }
+
+// Function To Check For Sprite Collisions
 function checkCollision(sprite1, sprite2) {
   return (
     sprite1.x < sprite2.x + sprite2.width &&
@@ -46,12 +52,14 @@ function checkCollision(sprite1, sprite2) {
   );
 }
 
+// Main Menu Level
 class Menu extends Level {
   constructor(game) {
     super(game);
     this.game = game;
   }
 
+  // Initialize Main Menu Level With Background, Game Title, Play Button, And Tutorial Button
   init() {
     let myBackground = new Background(
       0,
@@ -97,12 +105,14 @@ class Menu extends Level {
   }
 }
 
+// First Game Level
 class Level1 extends Level {
   constructor(game) {
     super(game);
     this.game = game;
   }
 
+  // Initialize First Game Level With Background, Hero, Enemy Generator, Lives, Score, And Game Controls
   init() {
     let myBackground = new Background(
       0,
@@ -120,21 +130,25 @@ class Level1 extends Level {
     );
     let myLives = new Lives(this.game);
     let myScore = new Score(this.game);
+    let gameControls = new GameControls(this.game);
 
     this.game.addSprite(myBackground);
     this.game.addSprite(myHero);
     this.game.addSprite(myEnemyGenerator);
     this.game.addSprite(myLives);
     this.game.addSprite(myScore);
+    this.game.addSprite(gameControls);
   }
 }
 
+// Second Game Level
 class Level2 extends Level {
   constructor(game) {
     super(game);
     this.game = game;
   }
 
+  // Initialize Second Game Level With Background, Hero, Enemy Generator, Lives, Score, And Game Controls
   init() {
     let myBackground = new Background(
       0,
@@ -152,21 +166,25 @@ class Level2 extends Level {
     );
     let myLives = new Lives(this.game);
     let myScore = new Score(this.game);
+    let gameControls = new GameControls(this.game);
 
     this.game.addSprite(myBackground);
     this.game.addSprite(myHero);
     this.game.addSprite(myEnemyGenerator2);
     this.game.addSprite(myLives);
     this.game.addSprite(myScore);
+    this.game.addSprite(gameControls);
   }
 }
 
+// Tutorial Level
 class Tutorial extends Level {
   constructor(game) {
     super(game);
     this.game = game;
   }
 
+  // Initialize Tutorial Level With Background, Game Title, Controls Text, Enemy Types Text, Win Text, And Back Button
   init() {
     let myBackground = new Background(
       0,
@@ -322,15 +340,19 @@ class Tutorial extends Level {
       }
     );
 
+    let gameControls = new GameControls(this.game);
+
     this.game.addSprite(myBackground);
     this.game.addSprite(tutorialTitle);
     this.game.addSprite(controlsText);
     this.game.addSprite(enemyText);
     this.game.addSprite(winText);
     this.game.addSprite(backButton);
+    this.game.addSprite(gameControls);
   }
 }
 
+// Button Class
 class Button extends Sprite {
   constructor(x, y, width, height, image, game, onClick) {
     super();
@@ -345,6 +367,7 @@ class Button extends Sprite {
     this.isHovered = false;
   }
 
+  // Update Button State Based On Mouse Position
   update(sprites, keys) {
     const mouse = this.game.mouse;
     this.isHovered =
@@ -364,6 +387,7 @@ class Button extends Sprite {
     return false;
   }
 
+  // Draw Button On Canvas
   draw(ctx) {
     if (this.isHovered) {
       ctx.globalAlpha = 0.8;
@@ -373,6 +397,7 @@ class Button extends Sprite {
   }
 }
 
+// Game Title Class
 class GameTitle extends Sprite {
   constructor(x, y, width, height, image) {
     super();
@@ -384,15 +409,18 @@ class GameTitle extends Sprite {
     this.image.src = image;
   }
 
+  // Update Game Title State
   update(sprites, keys) {
     return false;
   }
 
+  // Draw Game Title On Canvas
   draw(ctx) {
     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
   }
 }
 
+// Hero Class
 class Hero extends Sprite {
   constructor(x, y, game) {
     super();
@@ -416,6 +444,7 @@ class Hero extends Sprite {
     this.jumpKillCooldown = 0;
     this.hasLongJump = false;
 
+    // Initialize Hero States With Sprite Sheets
     this.states = {
       idle: new SpriteSheet("public/hero/Pink_Monster_Idle_4.png", 128, 33, 4),
       running: new SpriteSheet(
@@ -449,6 +478,7 @@ class Hero extends Sprite {
     this.currentState = "idle";
   }
 
+  // Set Hero State
   setState(state) {
     if (this.currentState !== state) {
       this.currentState = state;
@@ -461,12 +491,15 @@ class Hero extends Sprite {
     }
   }
 
+  // Update Hero State
   update(sprites, keys) {
+    // If Hero Is Dead, Update Animation
     if (!this.isAlive) {
       this.states[this.currentState].update();
       return false;
     }
 
+    // If Hero Is Hurt, Update Hurt Timer
     if (this.isHurt) {
       this.hurtTimer--;
       if (this.hurtTimer <= 0) {
@@ -475,12 +508,16 @@ class Hero extends Sprite {
       }
     }
 
+    // If Hero Is Jumping, Update Jump Kill Cooldown
     if (this.jumpKillCooldown > 0) {
       this.jumpKillCooldown--;
     }
 
+    // If Hero Is Jumping, Update Jump Power And Move Speed
     let jumpPower = this.hasLongJump ? -16 : this.jumpPower;
     let moveSpeed = this.hasLongJump ? 3 : this.speed;
+
+    // If Hero Is Jumping, Update Jump Power And Move Speed
     if (keys[" "] && this.grounded) {
       this.verticalSpeed = jumpPower;
       this.grounded = false;
@@ -489,9 +526,11 @@ class Hero extends Sprite {
       jumpSound.play();
     }
 
+    // Update Hero Vertical Speed And Position
     this.verticalSpeed += this.gravity;
     this.y += this.verticalSpeed;
 
+    // Check If Hero Is On Cloud Platform
     let onCloudPlatform = false;
     for (let i = 0; i < sprites.length; i++) {
       let sprite = sprites[i];
@@ -512,6 +551,7 @@ class Hero extends Sprite {
       }
     }
 
+    // If Hero Is Not On Cloud Platform And Is On Ground, Update Hero Position
     if (!onCloudPlatform && this.y >= this.groundLevel) {
       this.y = this.groundLevel;
       this.verticalSpeed = 0;
@@ -519,6 +559,7 @@ class Hero extends Sprite {
       this.isJumping = false;
     }
 
+    // If Hero Is Shooting, Update Shoot Cooldown
     if (keys["ArrowUp"] && this.shootCooldown == 0) {
       this.game.addSprite(new Rock(this.x + 20, this.y + 10, 16, 16, 1.5, 0));
       this.isShooting = true;
@@ -527,6 +568,7 @@ class Hero extends Sprite {
       throwSound.play();
     }
 
+    // If Hero Is Shooting, Update Shoot Cooldown
     if (this.shootCooldown > 0) {
       this.shootCooldown--;
       if (this.shootCooldown <= 15) {
@@ -534,10 +576,12 @@ class Hero extends Sprite {
       }
     }
 
+    // If Hero Is Hurt, Update Hurt State
     let newState = "idle";
     if (this.isHurt) {
       newState = "hurt";
     } else if (this.isJumping) {
+      // If Hero Is Jumping, Update Jump State
       newState = "jumping";
     } else if (
       keys["ArrowLeft"] ||
@@ -545,31 +589,43 @@ class Hero extends Sprite {
       keys["a"] ||
       keys["d"]
     ) {
+      // If Hero Is Running, Update Running State
       newState = "running";
     } else if (this.isShooting) {
+      // If Hero Is Shooting, Update Shooting State
       newState = "shooting";
     }
 
+    // Set Hero State
     this.setState(newState);
 
+    // Update Hero Animation
     this.states[this.currentState].update();
 
+    // If Hero Is Moving Left, Update Hero Position
     if (keys["ArrowLeft"] || keys["a"]) {
       this.x -= moveSpeed;
     }
+
+    // If Hero Is Moving Right, Update Hero Position
     if (keys["ArrowRight"] || keys["d"]) {
       this.x += moveSpeed;
     }
 
+    // Check For Collisions With Enemies
     for (let i = 0; i < sprites.length; i++) {
       let sprite = sprites[i];
+
+      // If Enemy Is Not Dead, Check For Collision
       if (sprite instanceof EnemyEasy && !sprite.isDead) {
         let scoreSprite = sprites.find((sprite) => sprite instanceof Score);
         if (checkCollision(this, sprite)) {
+          // If Hero Is Jumping And Enemy Is Below Hero, Kill Enemy
           if (
             this.verticalSpeed > 0 &&
             this.y + this.height < sprite.y + sprite.height / 2
           ) {
+            // If Hero Is Jumping And Enemy Is Below Hero, Kill Enemy
             sprite.isDead = true;
             sprite.setState("dead");
             this.verticalSpeed = this.jumpPower / 2;
@@ -578,19 +634,24 @@ class Hero extends Sprite {
             let killSound = new Audio("public/audio/jump.mp3");
             killSound.play();
           } else if (this.jumpKillCooldown === 0) {
+            // If Hero Is Dead, Update Hero State
             this.isAlive = false;
             this.setState("dead");
           }
           break;
         }
+
+        // If Flying Enemy Is Not Dead, Check For Collision
       } else if (
         (sprite instanceof FlyingEnemy && !sprite.isDead) ||
         (sprite instanceof FlyingEnemyBullet && !sprite.isRemoved)
       ) {
         if (checkCollision(this, sprite)) {
+          // If Hero Is Dead, Update Hero State
           this.isAlive = false;
           this.setState("dead");
 
+          // If Flying Enemy Bullet Is Not Removed, Remove Flying Enemy Bullet
           if (sprite instanceof FlyingEnemyBullet) {
             sprite.isRemoved = true;
           }
@@ -599,6 +660,7 @@ class Hero extends Sprite {
       }
     }
 
+    // Check For Ladder Collision
     let ladder = sprites.find(
       (sprite) =>
         sprite instanceof PinkStair &&
@@ -607,7 +669,11 @@ class Hero extends Sprite {
         this.y + this.height > sprite.y &&
         this.y < sprite.y + sprite.height
     );
+
+    // If Ladder Is Found, Update Hero Position
     let onStair = false;
+
+    // If Ladder Is Found, Update Hero Position
     if (ladder) {
       let heroCenter = this.x + this.width / 2;
       let ladderLeft = ladder.x + ladder.width / 3;
@@ -617,15 +683,20 @@ class Hero extends Sprite {
       }
     }
 
+    // If Ladder Is Found, Update Hero Position
     if (onStair && (keys["ArrowUp"] || keys["w"])) {
       this.y -= this.speed;
       this.verticalSpeed = 0;
       this.setState("climb");
+      // If Hero Is Climbing Up, Update Hero Position
     } else if (onStair && (keys["ArrowDown"] || keys["s"])) {
       this.y += this.speed;
       this.verticalSpeed = 0;
       this.setState("climb");
+      // If Hero Is Climbing Down, Update Hero Position
     }
+
+    // If Hero Is Climbing Up Or Down, Update Hero Position
     if (
       onStair &&
       (keys["ArrowUp"] || keys["w"] || keys["ArrowDown"] || keys["s"])
@@ -633,9 +704,12 @@ class Hero extends Sprite {
       this.verticalSpeed = 0;
     }
 
+    // Check For Floor Platform Collision
     let onFloorPlatform = false;
     for (let i = 0; i < sprites.length; i++) {
       let sprite = sprites[i];
+
+      // If Floor Platform Is Found, Update Hero Position
       if (sprite instanceof FloorPlatform) {
         if (
           this.y + this.height <= sprite.y + 5 &&
@@ -653,14 +727,17 @@ class Hero extends Sprite {
       }
     }
 
+    // Return False If Hero Is Not On Floor Platform
     return false;
   }
 
+  // Draw Hero On Canvas
   draw(ctx) {
     this.states[this.currentState].draw(ctx, this.x, this.y);
   }
 }
 
+// Background Class
 class Background extends Sprite {
   constructor(x, y, width, height, image) {
     super();
@@ -672,6 +749,7 @@ class Background extends Sprite {
     this.image.src = image;
     this.speed = 0.5;
 
+    // If Background Is Platformer Background 1, Play Background Music
     if (image === "public/background/platformer_background_1.png") {
       if (!Background.music) {
         Background.music = new Audio("public/audio/bgMusic.mp3");
@@ -682,6 +760,7 @@ class Background extends Sprite {
         Background.music.play();
       }
     } else {
+      // If Background Is Not Platformer Background 1, Pause Background Music
       if (Background.music) {
         Background.music.pause();
         Background.music.currentTime = 0;
@@ -690,6 +769,7 @@ class Background extends Sprite {
     }
   }
 
+  // Update Background Position
   update() {
     if (this.image == "public/background/platformer_background_1.png") {
       this.x -= this.speed;
@@ -701,6 +781,7 @@ class Background extends Sprite {
     }
   }
 
+  // Draw Background On Canvas
   draw(ctx) {
     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
     ctx.drawImage(
@@ -713,6 +794,7 @@ class Background extends Sprite {
   }
 }
 
+// Rock Class
 class Rock extends Sprite {
   constructor(x, y, width, height, speedX, speedY = 0) {
     super();
@@ -727,18 +809,22 @@ class Rock extends Sprite {
     this.isRemoved = false;
   }
 
+  // Update Rock Position
   update(sprites, keys) {
     if (this.isRemoved) {
       return true;
     }
 
+    // Update Rock Position
     this.x += this.speedX;
     this.y += this.speedY;
 
+    // If Rock Is Out Of Bounds, Remove Rock
     if (this.x > 960 || this.x < 0 || this.y > 540 || this.y < 0) {
       return true;
     }
 
+    // Check For Collisions With Enemies
     for (let i = 0; i < sprites.length; i++) {
       let sprite = sprites[i];
       if (
@@ -747,6 +833,7 @@ class Rock extends Sprite {
         (sprite instanceof FlyingEnemyBullet && !sprite.isRemoved) ||
         (sprite instanceof Boss1Enemy && !sprite.isDead)
       ) {
+        // If Enemy Is Not Dead, Check For Collision
         let scoreSprite = sprites.find((sprite) => sprite instanceof Score);
         if (checkCollision(this, sprite)) {
           if (sprite instanceof EnemyEasy) {
@@ -772,18 +859,24 @@ class Rock extends Sprite {
                 bossHitSound.play();
               }
             }
+
+            // If Enemy Is Not Dead, Remove Enemy
           } else {
             sprite.isRemoved = true;
           }
+
+          // Remove Rock
           this.isRemoved = true;
           break;
         }
       }
     }
 
+    // Return False If Rock Is Not Removed
     return false;
   }
 
+  // Draw Rock On Canvas
   draw(ctx) {
     if (!this.isRemoved) {
       ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
@@ -791,6 +884,7 @@ class Rock extends Sprite {
   }
 }
 
+// EnemyEasy Class
 class EnemyEasy extends Sprite {
   constructor(x, y, width, height, speed) {
     super();
@@ -808,6 +902,7 @@ class EnemyEasy extends Sprite {
     this.currentState = "walking";
   }
 
+  // Set EnemyEasy State
   setState(state) {
     if (this.currentState !== state) {
       this.currentState = state;
@@ -815,10 +910,12 @@ class EnemyEasy extends Sprite {
     }
   }
 
+  // Update EnemyEasy Position
   update(sprites, keys) {
     this.x += this.speed;
     this.states[this.currentState].update();
 
+    // If EnemyEasy Is Out Of Bounds, Remove EnemyEasy
     if (
       this.x < -this.width ||
       (this.isDead &&
@@ -828,10 +925,12 @@ class EnemyEasy extends Sprite {
       return true;
     }
 
+    // If EnemyEasy Is Dead, Return False
     if (this.isDead) {
       return false;
     }
 
+    // Check For Collisions With Rocks
     for (let i = 0; i < sprites.length; i++) {
       let sprite = sprites[i];
       if (
@@ -839,6 +938,7 @@ class EnemyEasy extends Sprite {
         !sprite.isRemoved &&
         checkCollision(this, sprite)
       ) {
+        // If Rock Is Not Removed, Remove Rock
         this.isDead = true;
         this.setState("dead");
         sprite.isRemoved = true;
@@ -846,14 +946,17 @@ class EnemyEasy extends Sprite {
       }
     }
 
+    // Return False If EnemyEasy Is Not Dead
     return false;
   }
 
+  // Draw EnemyEasy On Canvas
   draw(ctx) {
     this.states[this.currentState].draw(ctx, this.x, this.y);
   }
 }
 
+// FlyingEnemy Class
 class FlyingEnemy extends Sprite {
   constructor(x, y, width, height, speed, game) {
     super();
@@ -883,6 +986,7 @@ class FlyingEnemy extends Sprite {
     this.currentState = "flying";
   }
 
+  // Set FlyingEnemy State
   setState(state) {
     if (this.currentState !== state) {
       this.currentState = state;
@@ -890,10 +994,12 @@ class FlyingEnemy extends Sprite {
     }
   }
 
+  // Update FlyingEnemy Position
   update(sprites, keys) {
     this.x += this.speed;
     this.states[this.currentState].update();
 
+    // If FlyingEnemy Is Out Of Bounds, Remove FlyingEnemy
     if (
       this.x < -this.width ||
       (this.isDead &&
@@ -903,10 +1009,12 @@ class FlyingEnemy extends Sprite {
       return true;
     }
 
+    // If FlyingEnemy Is Dead, Return False
     if (this.isDead) {
       return false;
     }
 
+    // If FlyingEnemy Is Shooting, Update FlyingEnemy State
     if (
       this.currentState === "shooting" &&
       this.states[this.currentState].frameIndex ===
@@ -915,14 +1023,17 @@ class FlyingEnemy extends Sprite {
       this.setState("flying");
     }
 
+    // If FlyingEnemy Shoot Cooldown Is Greater Than 0, Decrease FlyingEnemy Shoot Cooldown
     if (this.shootCooldown > 0) {
       this.shootCooldown--;
     }
 
+    // If FlyingEnemy Shoot Cooldown Is 0 And FlyingEnemy Is Not Dead, Set FlyingEnemy Auto Shoot To True And Set FlyingEnemy Shoot Cooldown To 500
     if (this.shootCooldown === 0 && !this.isDead) {
       this.autoShoot = true;
       this.shootCooldown = 500;
 
+      // Add FlyingEnemy Bullet To Game
       this.game.addSprite(
         new FlyingEnemyBullet(
           this.x + this.width / 2 - 6,
@@ -932,17 +1043,21 @@ class FlyingEnemy extends Sprite {
           -1
         )
       );
+
+      // Set FlyingEnemy State To Shooting
       this.setState("shooting");
     }
 
     return false;
   }
 
+  // Draw FlyingEnemy On Canvas
   draw(ctx) {
     this.states[this.currentState].draw(ctx, this.x, this.y);
   }
 }
 
+// FlyingEnemyBullet Class
 class FlyingEnemyBullet extends Sprite {
   constructor(x, y, width, height, speed) {
     super();
@@ -957,18 +1072,22 @@ class FlyingEnemyBullet extends Sprite {
     this.isRemoved = false;
   }
 
+  // Update FlyingEnemyBullet Position
   update(sprites, keys) {
     if (this.isRemoved) {
       return true;
     }
 
+    // Update FlyingEnemyBullet Position
     this.x += this.speedX;
     this.y += this.speedY;
 
+    // If FlyingEnemyBullet Is Out Of Bounds, Remove FlyingEnemyBullet
     if (this.x < 0 || this.x > 960 || this.y < 0 || this.y > 540) {
       return true;
     }
 
+    // Get Hero From Sprites
     let hero = null;
     for (let i = 0; i < sprites.length; i++) {
       if (sprites[i] instanceof Hero) {
@@ -977,6 +1096,7 @@ class FlyingEnemyBullet extends Sprite {
       }
     }
 
+    // If Hero Is Alive, Check For Collision With Hero
     if (hero && hero.isAlive) {
       const bulletBox = {
         x: this.x,
@@ -985,6 +1105,7 @@ class FlyingEnemyBullet extends Sprite {
         height: this.height,
       };
 
+      // Get Hero Box
       const heroBox = {
         x: hero.x,
         y: hero.y,
@@ -992,6 +1113,7 @@ class FlyingEnemyBullet extends Sprite {
         height: 33,
       };
 
+      // If Bullet Box And Hero Box Collide, Set Hero Alive To False And Set Hero State To Dead
       if (checkCollision(bulletBox, heroBox)) {
         hero.isAlive = false;
         hero.setState("dead");
@@ -1000,9 +1122,11 @@ class FlyingEnemyBullet extends Sprite {
       }
     }
 
+    // Return False If FlyingEnemyBullet Is Not Removed
     return false;
   }
 
+  // Draw FlyingEnemyBullet On Canvas
   draw(ctx) {
     if (!this.isRemoved) {
       ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
@@ -1010,6 +1134,7 @@ class FlyingEnemyBullet extends Sprite {
   }
 }
 
+// Boss1Enemy Class
 class Boss1Enemy extends Sprite {
   constructor(x, y, width, height, speed) {
     super();
@@ -1062,6 +1187,7 @@ class Boss1Enemy extends Sprite {
     this.hasSpawnedFlame = false;
   }
 
+  // Set Boss1Enemy State
   setState(state) {
     if (this.currentState !== state) {
       this.currentState = state;
@@ -1074,9 +1200,11 @@ class Boss1Enemy extends Sprite {
     }
   }
 
+  // Update Boss1Enemy Position
   update(sprites, keys) {
     this.states[this.currentState].update();
 
+    // If Boss1Enemy Is Not In Game, Set Game To Hero Game
     if (!this.game) {
       for (let i = 0; i < sprites.length; i++) {
         if (sprites[i] instanceof Hero) {
@@ -1086,10 +1214,12 @@ class Boss1Enemy extends Sprite {
       }
     }
 
+    // If Boss1Enemy Is Hit, Flash Boss1Enemy
     if (this.hitFlashTimer > 0) {
       this.hitFlashTimer--;
     }
 
+    // If Boss1Enemy Is Out Of Bounds, Remove Boss1Enemy
     if (
       this.x < -this.width ||
       (this.isDead &&
@@ -1099,10 +1229,12 @@ class Boss1Enemy extends Sprite {
       return true;
     }
 
+    // If Boss1Enemy Is Dead, Return False
     if (this.isDead) {
       return false;
     }
 
+    // If Boss1Enemy Is Walking, Update Boss1Enemy Position
     if (this.currentState === "walking") {
       this.x += this.speed;
 
@@ -1110,6 +1242,7 @@ class Boss1Enemy extends Sprite {
         this.setState("idle");
       }
     } else if (this.currentState === "idle") {
+      // If Boss1Enemy Is Idle, Update Boss1Enemy Attack Cooldown
       if (this.attackCooldown > 0) {
         this.attackCooldown--;
       } else {
@@ -1117,6 +1250,7 @@ class Boss1Enemy extends Sprite {
         this.attackCooldown = this.attackInterval;
       }
     } else if (this.currentState === "shooting") {
+      // If Boss1Enemy Is Shooting, Update Boss1Enemy Flame Spawn Timer
       if (this.game && this.flameSpawnTimer <= 0 && !this.hasSpawnedFlame) {
         this.spawnSkyFlame();
         this.hasSpawnedFlame = true;
@@ -1124,6 +1258,7 @@ class Boss1Enemy extends Sprite {
         this.flameSpawnTimer--;
       }
 
+      // If Boss1Enemy Is Shooting, Update Boss1Enemy State
       if (
         this.states[this.currentState].frameIndex ===
         this.states[this.currentState].frames - 1
@@ -1132,6 +1267,7 @@ class Boss1Enemy extends Sprite {
       }
     }
 
+    // Check For Collisions With Rocks
     for (let i = 0; i < sprites.length; i++) {
       let sprite = sprites[i];
       if (
@@ -1143,6 +1279,7 @@ class Boss1Enemy extends Sprite {
         sprite.isRemoved = true;
       }
 
+      // Check For Collisions With Hero
       if (
         sprite instanceof Hero &&
         sprite.isAlive &&
@@ -1153,6 +1290,7 @@ class Boss1Enemy extends Sprite {
       }
     }
 
+    // If Boss1Enemy Is Boss Fight, Boss Spawned, Level Index Is 1 And Boss1Enemy Is Not In Game, Change Level To 2
     if (
       this.isBossFight &&
       this.bossSpawned &&
@@ -1165,21 +1303,27 @@ class Boss1Enemy extends Sprite {
     return false;
   }
 
+  // Spawn Sky Flame
   spawnSkyFlame() {
     if (!this.game) return;
 
+    // Get Spawn X
     const spawnX = this.flameSpawnPositions[this.currentFlamePosition];
 
+    // Update Current Flame Position
     this.currentFlamePosition =
       (this.currentFlamePosition + 1) % this.flameSpawnPositions.length;
 
+    // Add Sky Flame To Game
     this.game.addSprite(new SkyFlame(spawnX, 0, 143, 75, 1.5));
 
+    // Play Flame Sound
     let flameSound = new Audio("public/audio/flame.mp3");
     flameSound.volume = 0.3;
     flameSound.play();
   }
 
+  // Draw Boss1Enemy On Canvas
   draw(ctx) {
     if (this.hitFlashTimer > 0) {
       ctx.globalAlpha = 0.7;
@@ -1191,12 +1335,14 @@ class Boss1Enemy extends Sprite {
       this.states[this.currentState].draw(ctx, this.x, this.y);
     }
 
+    // If Boss1Enemy Is Not Dead, Draw Boss1Enemy Health Bar
     if (!this.isDead) {
       const barWidth = 400;
       const barHeight = 30;
       const healthPercent = this.health / this.maxHealth;
 
       const barX = this.game.canvas.width / 2 - barWidth / 2;
+
       const barY = 20;
 
       ctx.shadowColor = "black";
@@ -1223,6 +1369,7 @@ class Boss1Enemy extends Sprite {
   }
 }
 
+// Boss2Enemy Class
 class Boss2Enemy extends Sprite {
   constructor(x, y, width, height, speed) {
     super();
@@ -1270,8 +1417,10 @@ class Boss2Enemy extends Sprite {
     this.game = null;
     this.laserSpawned = false;
     this.laserY = this.y + 110;
+    this.winTriggered = false;
   }
 
+  // Set Boss2Enemy State
   setState(state) {
     if (this.currentState !== state) {
       this.currentState = state;
@@ -1282,8 +1431,11 @@ class Boss2Enemy extends Sprite {
     }
   }
 
+  // Update Boss2Enemy Position
   update(sprites, keys) {
     this.states[this.currentState].update();
+
+    // If Boss2Enemy Is Not In Game, Set Game To Hero Game
     if (!this.game) {
       for (let i = 0; i < sprites.length; i++) {
         if (sprites[i] instanceof Hero) {
@@ -1292,6 +1444,7 @@ class Boss2Enemy extends Sprite {
         }
       }
     }
+    // If Boss2Enemy Is Out Of Bounds, Remove Boss2Enemy
     if (
       this.x < -this.width ||
       (this.isDead &&
@@ -1300,15 +1453,20 @@ class Boss2Enemy extends Sprite {
     ) {
       return true;
     }
+
+    // If Boss2Enemy Is Dead, Return False
     if (this.isDead) {
       return false;
     }
+
+    // If Boss2Enemy Is Walking, Update Boss2Enemy Position
     if (this.currentState === "walking") {
       this.x += this.speed;
       if (this.initialX - this.x >= this.walkDistance) {
         this.setState("idle");
       }
     } else if (this.currentState === "idle") {
+      // If Boss2Enemy Is Idle, Update Boss2Enemy Attack Cooldown
       if (this.attackCooldown > 0) {
         this.attackCooldown--;
       } else {
@@ -1316,10 +1474,12 @@ class Boss2Enemy extends Sprite {
         this.attackCooldown = this.attackInterval;
       }
     } else if (this.currentState === "shooting") {
+      // If Boss2Enemy Is Shooting, Update Boss2Enemy Laser Spawned
       if (!this.laserSpawned && this.game) {
         this.spawnLaser();
         this.laserSpawned = true;
       }
+      // If Boss2Enemy Is Shooting, Update Boss2Enemy State
       if (
         this.states[this.currentState].frameIndex ===
         this.states[this.currentState].frames - 1
@@ -1327,6 +1487,8 @@ class Boss2Enemy extends Sprite {
         this.setState("idle");
       }
     }
+
+    // Check For Collisions With Rocks
     for (let i = 0; i < sprites.length; i++) {
       let sprite = sprites[i];
       if (
@@ -1334,32 +1496,40 @@ class Boss2Enemy extends Sprite {
         !sprite.isRemoved &&
         checkCollision(this, sprite)
       ) {
+        // If Rock Is Not Removed, Remove Rock
         sprite.isRemoved = true;
+        // If Boss2Enemy Health Is Less Than Or Equal To 0 And Boss2Enemy Win Triggered Is False, Set Boss2Enemy Dead To True And Set Boss2Enemy State To Dead
         this.health -= 1;
-        if (this.health <= 0) {
+        if (this.health <= 0 && !this.winTriggered) {
           this.isDead = true;
           this.setState("dead");
+          this.winTriggered = true;
+          // Add Win Screen To Game
+          this.game.addSprite(new WinScreen(this.game));
         }
       }
+      // If Hero Is Alive, Check For Collision With Boss2Enemy
       if (
         sprite instanceof Hero &&
         sprite.isAlive &&
         checkCollision(this, sprite)
       ) {
+        // If Hero Is Alive, Set Hero Alive To False And Set Hero State To Dead
         sprite.isAlive = false;
         sprite.setState("dead");
       }
     }
 
+    // If Boss2Enemy Has Not Despawned Special, Set Boss2Enemy Has Despawned Special To True
     if (!this.hasDespawnedSpecial) {
       this.hasDespawnedSpecial = true;
 
+      // Get Platform, Stairs, Key
       let platform = sprites.find((s) => s instanceof FloorPlatform);
       let stairs = sprites.find((s) => s instanceof PinkStair);
-      let key = sprites.find(
-        (s) => s instanceof KeyCollectible && !s.collected
-      );
+      let key = sprites.find((s) => s instanceof KeyCollectible);
 
+      // If Platform, Stairs Or Key Is Found, Remove Platform, Stairs Or Key
       if (platform) platform.isRemoved = true;
       if (stairs) stairs.isRemoved = true;
       if (key) key.isRemoved = true;
@@ -1368,6 +1538,7 @@ class Boss2Enemy extends Sprite {
     return false;
   }
 
+  // Spawn Laser
   spawnLaser() {
     const laserX = this.x - 240 + 120;
     const laserY = this.y + 90;
@@ -1377,6 +1548,7 @@ class Boss2Enemy extends Sprite {
     laserSound.play();
   }
 
+  // Draw Boss2Enemy On Canvas
   draw(ctx) {
     this.states[this.currentState].draw(ctx, this.x, this.y);
     if (!this.isDead) {
@@ -1406,6 +1578,7 @@ class Boss2Enemy extends Sprite {
   }
 }
 
+// Boss2Laser Class
 class Boss2Laser extends Sprite {
   constructor(x, y, width, height, speed) {
     super();
@@ -1419,14 +1592,23 @@ class Boss2Laser extends Sprite {
     this.isRemoved = false;
   }
 
+  // Update Boss2Laser Position
   update(sprites, keys) {
     if (this.isRemoved) return true;
+
+    // Update Boss2Laser Position
     this.x += this.speedX;
+
+    // If Boss2Laser Is Out Of Bounds, Remove Boss2Laser
     if (this.x > 960) return true;
+
+    // Check For Collisions With Hero
     for (let i = 0; i < sprites.length; i++) {
       let sprite = sprites[i];
       if (sprite instanceof Hero && sprite.isAlive) {
+        // If Hero Is Alive, Check For Collision With Boss2Laser
         if (checkCollision(this, sprite)) {
+          // If Hero Is Alive, Set Hero Alive To False And Set Hero State To Dead
           sprite.isAlive = false;
           sprite.setState("dead");
           this.isRemoved = true;
@@ -1434,9 +1616,12 @@ class Boss2Laser extends Sprite {
         }
       }
     }
+
+    // Return False If Boss2Laser Is Not Removed
     return false;
   }
 
+  // Draw Boss2Laser On Canvas
   draw(ctx) {
     if (!this.isRemoved) {
       ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
@@ -1444,6 +1629,7 @@ class Boss2Laser extends Sprite {
   }
 }
 
+// CloudPlatform Class
 class CloudPlatform extends Sprite {
   constructor(x, y, speed, game) {
     super();
@@ -1465,23 +1651,29 @@ class CloudPlatform extends Sprite {
     );
   }
 
+  // Update CloudPlatform Position
   update(sprites, keys) {
     if (this.isRemoved) {
       return true;
     }
 
+    // Update CloudPlatform Position
     this.x += this.speed;
 
+    // If CloudPlatform Is Out Of Bounds, Remove CloudPlatform
     if (this.x < -this.width) {
       return true;
     }
 
+    // Get Hero
     let hero = sprites.find((sprite) => sprite instanceof Hero);
 
+    // If Hero Is Alive And CloudPlatform Has Not Triggered, Check For Collision With Hero
     if (hero && hero.isAlive && !this.hasTriggered) {
       const heroBottom = hero.y + hero.height;
       const platformTop = this.y;
 
+      // If Hero Is Alive And CloudPlatform Has Not Triggered, Check For Collision With Hero
       if (
         Math.abs(heroBottom - platformTop) < 10 &&
         hero.x + hero.width > this.x &&
@@ -1492,6 +1684,7 @@ class CloudPlatform extends Sprite {
         hero.verticalSpeed = 0;
         hero.grounded = true;
 
+        // If CloudPlatform Is Not Active, Set CloudPlatform Active To True And Set CloudPlatform Activation Timer To 70
         if (!this.isActive) {
           this.isActive = true;
           this.activationTimer = 70;
@@ -1499,9 +1692,12 @@ class CloudPlatform extends Sprite {
       }
     }
 
+    // If CloudPlatform Is Active, Update CloudPlatform Activation Timer
     if (this.isActive) {
       this.activationTimer--;
 
+      // If CloudPlatform Activation Timer Is Less Than Or Equal To 0 And CloudPlatform Has Not Triggered, Shoot Rocks In All Directions,
+      //  Set CloudPlatform Has Triggered To True And Remove CloudPlatform
       if (this.activationTimer <= 0 && !this.hasTriggered) {
         this.shootRocksInAllDirections();
         this.hasTriggered = true;
@@ -1512,10 +1708,12 @@ class CloudPlatform extends Sprite {
     return false;
   }
 
+  // Shoot Rocks In All Directions
   shootRocksInAllDirections() {
     const centerX = this.x + this.width / 2;
     const centerY = this.y + this.height / 2;
 
+    // Add Rock To Game 3 On Each Side
     this.game.addSprite(new Rock(centerX - 10, centerY, 16, 16, -0.3, -1.5));
     this.game.addSprite(new Rock(centerX, centerY, 16, 16, 0, -1.5));
     this.game.addSprite(new Rock(centerX + 10, centerY, 16, 16, 0.3, -1.5));
@@ -1533,6 +1731,7 @@ class CloudPlatform extends Sprite {
     this.game.addSprite(new Rock(centerX, centerY + 10, 16, 16, 1.5, 0.3));
   }
 
+  // Draw CloudPlatform On Canvas
   draw(ctx) {
     if (!this.isRemoved) {
       this.sprite.draw(ctx, this.x, this.y);
@@ -1540,6 +1739,7 @@ class CloudPlatform extends Sprite {
   }
 }
 
+// EnemyGenerator Class
 class EnemyGenerator extends Sprite {
   constructor(spawnInterval, canvasWidth, canvasHeight, game) {
     super();
@@ -1548,16 +1748,19 @@ class EnemyGenerator extends Sprite {
     this.canvasHeight = canvasHeight;
     this.counter = 0;
     this.game = game;
+    // Ground Spawn Points
     this.groundSpawnPoints = [
       { x: canvasWidth, y: 410, speed: -1 },
       { x: canvasWidth, y: 410, speed: -1 },
       { x: canvasWidth + 2000, y: 410, speed: -1.15 },
     ];
+    // Air Spawn Points
     this.airSpawnPoints = [
       { x: canvasWidth, y: 150, speed: -1 },
       { x: canvasWidth, y: 250, speed: -1.25 },
       { x: canvasWidth + 300, y: 250, speed: -1.2 },
     ];
+    // Boss Spawn Point
     this.bossSpawnPoint = { x: canvasWidth, y: 250, speed: -0.3 };
     this.currentGroundPoint = 0;
     this.currentAirPoint = 0;
@@ -1568,11 +1771,13 @@ class EnemyGenerator extends Sprite {
     this.clearEnemiesTimer = 0;
   }
 
+  // Update EnemyGenerator
   update(sprites, keys) {
     let scoreSprite = sprites.find((sprite) => sprite instanceof Score);
     let score = scoreSprite ? scoreSprite.score : 0;
 
-    if (score >= 5 && !this.bossSpawned) {
+    // If Score Is Greater Than Or Equal To 20 And Boss Spawned Is False, Set Boss Fight To True And Set Boss Spawned To True
+    if (score >= 20 && !this.bossSpawned) {
       this.isBossFight = true;
       this.bossSpawned = true;
       this.clearEnemiesTimer = 180;
@@ -1583,9 +1788,11 @@ class EnemyGenerator extends Sprite {
       return false;
     }
 
+    // If Boss Fight Is True And Clear Enemies Timer Is Greater Than 0, Update Clear Enemies Timer
     if (this.isBossFight && this.clearEnemiesTimer > 0) {
       this.clearEnemiesTimer--;
 
+      // If Clear Enemies Timer Is 0, Remove All Enemies, Spawn Boss And Play Boss Music
       if (this.clearEnemiesTimer === 0) {
         for (let i = 0; i < sprites.length; i++) {
           if (
@@ -1598,6 +1805,7 @@ class EnemyGenerator extends Sprite {
           }
         }
 
+        // Spawn Boss
         this.game.addSprite(
           new Boss1Enemy(
             this.bossSpawnPoint.x,
@@ -1608,6 +1816,7 @@ class EnemyGenerator extends Sprite {
           )
         );
 
+        // Play Boss Music
         let bossMusic = new Audio("public/audio/boss-music.mp3");
         bossMusic.loop = true;
         bossMusic.play();
@@ -1616,26 +1825,33 @@ class EnemyGenerator extends Sprite {
       return false;
     }
 
+    // If Boss Fight Is False, Update Counter
     if (!this.isBossFight) {
       this.counter++;
       if (this.counter >= this.spawnInterval) {
         this.counter = 0;
         this.spawnCounter++;
 
+        // Spawn Ground Enemy
         this.spawnGroundEnemy();
 
+        // Spawn Flying Enemy
         if (this.spawnCounter % 2 == 0) {
           this.spawnFlyingEnemy();
         }
       }
 
+      // Update Cloud Platform Timer
       this.cloudPlatformTimer--;
+
+      // If Cloud Platform Timer Is Less Than Or Equal To 0, Spawn Cloud Platform
       if (this.cloudPlatformTimer <= 0) {
         this.spawnCloudPlatform();
         this.cloudPlatformTimer = 900 + Math.floor(Math.random() * 900);
       }
     }
 
+    // If Boss Fight Is True, Boss Spawned Is True, Level Index Is 1 And Boss1Enemy Is Not In Game, Change Level To 2
     if (
       this.isBossFight &&
       this.bossSpawned &&
@@ -1648,8 +1864,12 @@ class EnemyGenerator extends Sprite {
     return false;
   }
 
+  // Spawn Ground Enemy
   spawnGroundEnemy() {
+    // Get Spawn Point
     let spawnPoint = this.groundSpawnPoints[this.currentGroundPoint];
+
+    // Spawn Enemy
     this.game.addSprite(
       new EnemyEasy(spawnPoint.x, spawnPoint.y, 32, 32, spawnPoint.speed)
     );
@@ -1657,8 +1877,12 @@ class EnemyGenerator extends Sprite {
       (this.currentGroundPoint + 1) % this.groundSpawnPoints.length;
   }
 
+  // Spawn Flying Enemy
   spawnFlyingEnemy() {
+    // Get Spawn Point
     let spawnPoint = this.airSpawnPoints[this.currentAirPoint];
+
+    // Spawn Flying Enemy
     this.game.addSprite(
       new FlyingEnemy(
         spawnPoint.x,
@@ -1673,16 +1897,22 @@ class EnemyGenerator extends Sprite {
       (this.currentAirPoint + 1) % this.airSpawnPoints.length;
   }
 
+  // Spawn Cloud Platform
   spawnCloudPlatform() {
+    // Get Y Position
     const yPosition = 330 + Math.floor(Math.random() * 50);
+
+    // Spawn Cloud Platform
     this.game.addSprite(
       new CloudPlatform(this.canvasWidth, yPosition, -1, this.game)
     );
   }
 
+  // Draw EnemyGenerator On Canvas
   draw(ctx) {}
 }
 
+// EnemyGenerator2 Class
 class EnemyGenerator2 extends Sprite {
   constructor(spawnInterval, canvasWidth, canvasHeight, game) {
     super();
@@ -1691,16 +1921,19 @@ class EnemyGenerator2 extends Sprite {
     this.canvasHeight = canvasHeight;
     this.counter = 0;
     this.game = game;
+    // Ground Spawn Points
     this.groundSpawnPoints = [
       { x: canvasWidth, y: 410, speed: -1.3 },
       { x: canvasWidth, y: 410, speed: -1.5 },
       { x: canvasWidth + 1000, y: 410, speed: -1.7 },
     ];
+    // Air Spawn Points
     this.airSpawnPoints = [
       { x: canvasWidth, y: 120, speed: -1.5 },
       { x: canvasWidth, y: 200, speed: -1.7 },
       { x: canvasWidth + 300, y: 250, speed: -1.6 },
     ];
+    // Boss Spawn Point
     this.bossSpawnPoint = { x: canvasWidth, y: 260, speed: -0.5 };
     this.currentGroundPoint = 0;
     this.currentAirPoint = 0;
@@ -1712,11 +1945,13 @@ class EnemyGenerator2 extends Sprite {
     this.specialSpawned = false;
   }
 
+  // Update EnemyGenerator2
   update(sprites, keys) {
     let scoreSprite = sprites.find((sprite) => sprite instanceof Score);
     let score = scoreSprite ? scoreSprite.score : 0;
 
-    if (!this.specialSpawned && score >= 15) {
+    // If Special Platform Spawned Is False And Score Is Greater Than Or Equal To 20, Set Special Spawned To True
+    if (!this.specialSpawned && score >= 20) {
       this.specialSpawned = true;
       let platformStartX = this.canvasWidth + 10;
       let platformTargetX = 400;
@@ -1730,7 +1965,9 @@ class EnemyGenerator2 extends Sprite {
         platformTargetX,
         platformSpeed
       );
+      // Create Pink Stair
       let pinkStair = new PinkStair(floorPlatform, pinkStairOffsetX);
+      // Create Key Collectible
       let key = new KeyCollectible(
         floorPlatform,
         (platformWidth - 12) / 2,
@@ -1741,11 +1978,13 @@ class EnemyGenerator2 extends Sprite {
       this.game.addSprite(key);
     }
 
-    if (score >= 30 && !this.bossSpawned) {
+    // If Score Is Greater Than Or Equal To 45 And Boss Spawned Is False, Set Boss Fight To True And Set Boss Spawned To True
+    if (score >= 45 && !this.bossSpawned) {
       this.isBossFight = true;
       this.bossSpawned = true;
       this.clearEnemiesTimer = 400;
 
+      // Play Boss Warning Sound
       let bossWarningSound = new Audio("public/audio/boss-warning.mp3");
       bossWarningSound.play();
       this.bossWarningText = {
@@ -1770,8 +2009,11 @@ class EnemyGenerator2 extends Sprite {
       return false;
     }
 
+    // If Boss Fight Is True And Clear Enemies Timer Is Greater Than 0, Update Clear Enemies Timer
     if (this.isBossFight && this.clearEnemiesTimer > 0) {
       this.clearEnemiesTimer--;
+
+      // If Clear Enemies Timer Is 0, Remove All Enemies, Spawn Boss And Play Boss Music
       if (this.clearEnemiesTimer === 0) {
         for (let i = 0; i < sprites.length; i++) {
           if (
@@ -1783,6 +2025,8 @@ class EnemyGenerator2 extends Sprite {
             sprites[i].isRemoved = true;
           }
         }
+
+        // Spawn Boss
         this.game.addSprite(
           new Boss2Enemy(
             this.bossSpawnPoint.x,
@@ -1792,14 +2036,19 @@ class EnemyGenerator2 extends Sprite {
             this.bossSpawnPoint.speed
           )
         );
+
+        // Play Boss Music
         let bossMusic = new Audio("public/audio/boss-music.mp3");
         bossMusic.loop = true;
         bossMusic.play();
+
+        // Set Boss Warning Text To Null
         this.bossWarningText = null;
       }
       return false;
     }
 
+    // If Boss Fight Is False, Update Counter
     if (!this.isBossFight) {
       this.counter++;
       if (this.counter >= this.spawnInterval) {
@@ -1814,8 +2063,12 @@ class EnemyGenerator2 extends Sprite {
     return false;
   }
 
+  // Spawn Ground Enemy
   spawnGroundEnemy() {
+    // Get Spawn Point
     let spawnPoint = this.groundSpawnPoints[this.currentGroundPoint];
+
+    // Spawn Enemy
     this.game.addSprite(
       new EnemyEasy(spawnPoint.x, spawnPoint.y, 32, 32, spawnPoint.speed)
     );
@@ -1823,8 +2076,12 @@ class EnemyGenerator2 extends Sprite {
       (this.currentGroundPoint + 1) % this.groundSpawnPoints.length;
   }
 
+  // Spawn Flying Enemy
   spawnFlyingEnemy() {
+    // Get Spawn Point
     let spawnPoint = this.airSpawnPoints[this.currentAirPoint];
+
+    // Spawn Flying Enemy
     this.game.addSprite(
       new FlyingEnemy(
         spawnPoint.x,
@@ -1839,6 +2096,7 @@ class EnemyGenerator2 extends Sprite {
       (this.currentAirPoint + 1) % this.airSpawnPoints.length;
   }
 
+  // Draw EnemyGenerator2 On Canvas
   draw(ctx) {
     if (this.bossWarningText) {
       this.bossWarningText.draw(ctx);
@@ -1846,6 +2104,7 @@ class EnemyGenerator2 extends Sprite {
   }
 }
 
+// Lives Class
 class Lives extends Sprite {
   constructor(game) {
     super();
@@ -1867,10 +2126,14 @@ class Lives extends Sprite {
     this.height = 35;
     this.x = this.game.canvas.width - this.width - 10;
     this.y = 10;
+    this.gameOverSound = new Audio("public/audio/lose.mp3");
   }
 
+  // Update Lives
   update(sprites, keys) {
+    // Get Hero
     let hero = sprites.find((sprite) => sprite instanceof Hero);
+    // If Hero Is Alive And Lives Is Greater Than 0, Decrement Lives
     if (hero && !hero.isAlive && this.lives > 0) {
       this.lives--;
       hero.isAlive = true;
@@ -1878,6 +2141,7 @@ class Lives extends Sprite {
       hero.x = 100;
       hero.y = 410;
 
+      // Remove All Enemies
       for (let i = 0; i < sprites.length; i++) {
         if (
           sprites[i] instanceof EnemyEasy ||
@@ -1888,9 +2152,32 @@ class Lives extends Sprite {
         }
       }
     }
+
+    // If Lives Is Less Than Or Equal To 0 And Hero Is Alive, Play Game Over Sound
+    if (this.lives <= 0 && hero && !hero.isAlive) {
+      if (Background.music) {
+        Background.music.pause();
+        Background.music.currentTime = 0;
+      }
+
+      // Play Game Over Sound
+      this.gameOverSound.play();
+
+      // Remove Lives
+      for (let i = 0; i < sprites.length; i++) {
+        if (sprites[i] !== this) {
+          sprites[i].isRemoved = true;
+        }
+      }
+
+      // Add Lose Screen
+      this.game.addSprite(new LoseScreen(this.game));
+    }
+
     return false;
   }
 
+  // Draw Lives On Canvas
   draw(ctx) {
     ctx.drawImage(
       this.livesImages[this.lives],
@@ -1902,6 +2189,162 @@ class Lives extends Sprite {
   }
 }
 
+// LoseScreen Class
+class LoseScreen extends Sprite {
+  constructor(game) {
+    super();
+    this.game = game;
+    this.levelAtGameOver = game.levelIndex;
+    this.gameOverSound = new Audio("public/audio/lose.mp3");
+    this.stopped = false;
+    this.bindKeyboardEvents();
+  }
+
+  // Update LoseScreen
+  update(sprites, keys) {
+    if (!this.stopped) {
+      this.stopped = true;
+      if (Background.music) {
+        Background.music.pause();
+        Background.music.currentTime = 0;
+      }
+      this.gameOverSound.play();
+      for (let i = 0; i < sprites.length; i++) {
+        if (sprites[i] !== this) {
+          sprites[i].isRemoved = true;
+        }
+      }
+    }
+    return false;
+  }
+
+  // Draw LoseScreen On Canvas
+  draw(ctx) {
+    ctx.save();
+    ctx.globalAlpha = 0.7;
+    ctx.fillStyle = "#0CC0DF";
+    ctx.fillRect(0, 0, this.game.canvas.width, this.game.canvas.height);
+    ctx.globalAlpha = 1.0;
+    ctx.fillStyle = "#FF0000";
+    ctx.font = "50px 'boorsok'";
+    ctx.textAlign = "center";
+    ctx.shadowColor = "black";
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 3;
+    ctx.fillText(
+      "YOU LOSE",
+      this.game.canvas.width / 2,
+      this.game.canvas.height / 2 - 50
+    );
+    ctx.fillStyle = "#FF69B4";
+    ctx.font = "24px 'boorsok'";
+    ctx.fillText(
+      "Press R to Restart Level " + this.levelAtGameOver,
+      this.game.canvas.width / 2,
+      this.game.canvas.height / 2 + 20
+    );
+    ctx.fillText(
+      "Press G to Go to Menu",
+      this.game.canvas.width / 2,
+      this.game.canvas.height / 2 + 60
+    );
+    ctx.restore();
+  }
+
+  bindKeyboardEvents() {
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "r" || e.key === "R") {
+        this.game.sprites = [];
+        this.game.levels[this.levelAtGameOver].init();
+      }
+      if (e.key === "g" || e.key === "G") {
+        this.game.sprites = [];
+        this.game.levels[0].init();
+      }
+    });
+  }
+}
+
+// WinScreen Class
+class WinScreen extends Sprite {
+  constructor(game) {
+    super();
+    this.game = game;
+    this.levelAtGameOver = game.levelIndex;
+    this.winSound = new Audio("public/audio/win.mp3");
+    this.stopped = false;
+    this.bindKeyboardEvents();
+  }
+
+  // Update WinScreen
+  update(sprites, keys) {
+    if (!this.stopped) {
+      this.stopped = true;
+      if (Background.music) {
+        Background.music.pause();
+        Background.music.currentTime = 0;
+      }
+      this.winSound.play();
+      for (let i = 0; i < sprites.length; i++) {
+        if (sprites[i] !== this) {
+          sprites[i].isRemoved = true;
+        }
+      }
+    }
+    return false;
+  }
+
+  // Draw WinScreen On Canvas
+  draw(ctx) {
+    ctx.save();
+    ctx.globalAlpha = 0.7;
+    ctx.fillStyle = "#0CC0DF";
+    ctx.fillRect(0, 0, this.game.canvas.width, this.game.canvas.height);
+    ctx.globalAlpha = 1.0;
+    ctx.fillStyle = "#00FF00";
+    ctx.font = "50px 'boorsok'";
+    ctx.textAlign = "center";
+    ctx.shadowColor = "black";
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 3;
+    ctx.fillText(
+      "YOU WON",
+      this.game.canvas.width / 2,
+      this.game.canvas.height / 2 - 50
+    );
+    ctx.fillStyle = "#FF69B4";
+    ctx.font = "24px 'boorsok'";
+    ctx.fillText(
+      "Press R to Restart Game",
+      this.game.canvas.width / 2,
+      this.game.canvas.height / 2 + 20
+    );
+    ctx.fillText(
+      "Press G to Go to Menu",
+      this.game.canvas.width / 2,
+      this.game.canvas.height / 2 + 60
+    );
+    ctx.restore();
+  }
+
+  // Bind Keyboard Events
+  bindKeyboardEvents() {
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "r" || e.key === "R") {
+        this.game.sprites = [];
+        this.game.levels[1].init();
+      }
+      if (e.key === "g" || e.key === "G") {
+        this.game.sprites = [];
+        this.game.levels[0].init();
+      }
+    });
+  }
+}
+
+// Score Class
 class Score extends Sprite {
   constructor(game) {
     super();
@@ -1914,14 +2357,17 @@ class Score extends Sprite {
     this.y = 35;
   }
 
+  // Add Score
   addScore(points) {
     this.score += points;
   }
 
+  // Update Score
   update(sprites, keys) {
     return false;
   }
 
+  // Draw Score On Canvas
   draw(ctx) {
     ctx.font = this.font;
     ctx.fillStyle = this.color;
@@ -1939,6 +2385,7 @@ class Score extends Sprite {
   }
 }
 
+// SkyFlame Class
 class SkyFlame extends Sprite {
   constructor(x, y, width, height, speed) {
     super();
@@ -1952,20 +2399,25 @@ class SkyFlame extends Sprite {
     this.isRemoved = false;
   }
 
+  // Update SkyFlame
   update(sprites, keys) {
     if (this.isRemoved) {
       return true;
     }
 
+    // Update SkyFlame Position
     this.y += this.speedY;
 
+    // If SkyFlame Is Out Of Bounds, Remove SkyFlame
     if (this.y > 540) {
       return true;
     }
 
+    // Get Hero
     for (let i = 0; i < sprites.length; i++) {
       let sprite = sprites[i];
       if (sprite instanceof Hero && sprite.isAlive) {
+        // If Hero Is Alive And SkyFlame Is Colliding With Hero, Set Hero Alive To False And Set Hero State To Dead
         if (checkCollision(this, sprite)) {
           sprite.isAlive = false;
           sprite.setState("dead");
@@ -1978,6 +2430,7 @@ class SkyFlame extends Sprite {
     return false;
   }
 
+  // Draw SkyFlame On Canvas
   draw(ctx) {
     if (!this.isRemoved) {
       ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
@@ -1985,6 +2438,7 @@ class SkyFlame extends Sprite {
   }
 }
 
+// PinkStair Class
 class PinkStair extends Sprite {
   constructor(platform, offsetX) {
     super();
@@ -1995,17 +2449,22 @@ class PinkStair extends Sprite {
     this.image = new Image();
     this.image.src = "public/arc/pinkstairs.png";
   }
+
+  // Update PinkStair
   update(sprites, keys) {
     if (this.isRemoved) return true;
     this.x = this.platform.x + this.offsetX;
     this.y = this.platform.y + this.platform.height - 41;
     return false;
   }
+
+  // Draw PinkStair On Canvas
   draw(ctx) {
     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
   }
 }
 
+// FloorPlatform Class
 class FloorPlatform extends Sprite {
   constructor(startX, y, targetX, speed) {
     super();
@@ -2019,6 +2478,8 @@ class FloorPlatform extends Sprite {
     this.image.src = "public/arc/floorplatform.png";
     this.hasArrived = false;
   }
+
+  // Update FloorPlatform
   update(sprites, keys) {
     if (this.isRemoved) return true;
     if (!this.hasArrived) {
@@ -2032,11 +2493,14 @@ class FloorPlatform extends Sprite {
     }
     return false;
   }
+
+  // Draw FloorPlatform On Canvas
   draw(ctx) {
     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
   }
 }
 
+// KeyCollectible Class
 class KeyCollectible extends Sprite {
   constructor(platform, offsetX, game) {
     super();
@@ -2046,6 +2510,7 @@ class KeyCollectible extends Sprite {
     this.width = 18;
     this.height = 18;
     this.collected = false;
+    this.isRemoved = false;
     this.spriteSheet = new SpriteSheet(
       "public/collectibles/key.png",
       252,
@@ -2054,11 +2519,22 @@ class KeyCollectible extends Sprite {
     );
   }
 
+  // Update KeyCollectible
   update(sprites, keys) {
+    // If KeyCollectible Is Removed, Return True
+    if (this.isRemoved) return true;
+
+    // Update KeyCollectible Position
     this.x = this.platform.x + this.offsetX;
     this.y = this.platform.y - this.height;
     this.spriteSheet.update();
+
+    // Get Hero
     let hero = sprites.find((s) => s instanceof Hero && s.isAlive);
+
+    // If Hero Is Alive And KeyCollectible Is Not Collected And Hero Is Colliding With KeyCollectible,
+    // Set Key Collected To True, Set Hero Has Long Jump To True, Set Platform Removed To True,
+    // Find Pink Stair And Set Pink Stair Removed To True, Play Key Sound And Return True
     if (
       hero &&
       !this.collected &&
@@ -2067,6 +2543,7 @@ class KeyCollectible extends Sprite {
       hero.y < this.y + this.height &&
       hero.y + hero.height > this.y
     ) {
+      // Set Collected To True
       this.collected = true;
       hero.hasLongJump = true;
       this.platform.isRemoved = true;
@@ -2082,18 +2559,86 @@ class KeyCollectible extends Sprite {
     return false;
   }
 
+  // Draw KeyCollectible On Canvas
   draw(ctx) {
-    if (!this.collected) {
+    if (!this.collected && !this.isRemoved) {
       this.spriteSheet.draw(ctx, this.x, this.y);
     }
   }
 }
 
+// GameControls Class
+class GameControls extends Sprite {
+  constructor(game) {
+    super();
+    this.game = game;
+    this.paused = false;
+    this.restart = false;
+    this.bindKeyboardEvents();
+  }
+
+  // Update GameControls
+  update(sprites, keys) {
+    return false;
+  }
+
+  // Draw GameControls On Canvas
+  draw(ctx) {
+    if (this.paused) {
+      ctx.save();
+      ctx.globalAlpha = 0.7;
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, this.game.canvas.width, this.game.canvas.height);
+      ctx.globalAlpha = 1.0;
+      ctx.fillStyle = "#fff";
+      ctx.font = "40px 'boorsok', Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(
+        "PAUSED",
+        this.game.canvas.width / 2,
+        this.game.canvas.height / 2 - 20
+      );
+      ctx.font = "24px 'boorsok', Arial";
+      ctx.fillText(
+        "Press C To Continue",
+        this.game.canvas.width / 2,
+        this.game.canvas.height / 2 + 30
+      );
+      ctx.fillText(
+        "Press R To Restart",
+        this.game.canvas.width / 2,
+        this.game.canvas.height / 2 + 60
+      );
+      ctx.restore();
+    }
+  }
+
+  // Bind Keyboard Events For Game Controls
+  bindKeyboardEvents() {
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "p" || e.key === "P") {
+        this.paused = true;
+      }
+      if (e.key === "c" || e.key === "C") {
+        this.paused = false;
+      }
+      if (e.key === "r" || e.key === "R") {
+        this.paused = false;
+        this.game.sprites = [];
+        this.game.levels[this.game.levelIndex].init();
+      }
+    });
+  }
+}
+
+// Create Game Instance
 let myGame = new Game();
 
+// Add Levels To Game
 myGame.addLevel(new Menu(myGame));
 myGame.addLevel(new Level1(myGame));
 myGame.addLevel(new Level2(myGame));
 myGame.addLevel(new Tutorial(myGame));
 
+// Animate Game
 myGame.animate();

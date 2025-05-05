@@ -1,0 +1,153 @@
+EVIL DREAMER - GAME DESIGN DOCUMENT (CSIS 250)
+
+1. GAME OVERVIEW
+----------------
+Title: Evil Dreamer
+Genre: 2D Platformer
+Target Audience: Casual Gamers
+Platform: Web Browser
+Game Length: 2 Main Levels + Tutorial
+
+2. GAME CONCEPT
+---------------
+Evil Dreamer is a 2D platformer where players control a pink monster character through challenging levels filled with enemies and obstacles. The game features simple controls, engaging combat mechanics, and progressively difficult challenges.
+
+3. GAME MECHANICS
+----------------
+3.1 Core Mechanics:
+- Movement: Left/Right Movement Using Arrow Keys Or A/D
+- Jumping: Space Bar
+- Shooting: Up Arrow
+- Pause/Continue: P/C Keys
+- Restart Level: R Key
+- Menu Navigation: Mouse Click
+
+3.2 Combat System:
+- Ground Enemies: Can Be Jumped On Or Shot
+- Flying Enemies: Must Be Shot
+- Boss Enemies: Special Attack Patterns
+- Projectiles: Rocks For Player, Bullets For Enemies
+
+3.3 Power-Ups:
+- Long Jump Power: Obtained By Collecting Key In Level 2
+- Health System: 4 Lives Per Level
+
+4. CHARACTERS
+------------
+4.1 Player Character:
+- Name: Pink Monster
+- Abilities: Jump, Shoot, Long Jump (After Power-Up)
+- States: Idle, Running, Jumping, Shooting, Hurt, Dead, Climbing
+
+4.2 Enemies:
+- Ground Enemies: Basic Walking Enemies
+- Flying Enemies: Shoot Bullets
+- Boss 1 (Dragon): Shoots Raining Flames
+- Boss 2 (Demon Lord): Shoots Long Laser
+
+5. LEVELS
+---------
+5.1 Level 1:
+- Environment: Platformer Background
+- Enemies: Ground And Flying Enemies
+- Boss: Dragon
+- Objective: Defeat Boss 1
+
+5.2 Level 2:
+- Environment: Platformer Background
+- Enemies: Advanced Ground And Flying Enemies
+- Special Feature: Key Collection For Long Jump Power
+- Boss: Demon Lord
+- Objective: Defeat Boss 2
+
+5.3 Tutorial:
+- Environment: Pink Background
+- Content: Controls, Enemy Types, Game Objectives
+- Interactive Elements: Back Button To Menu
+
+6. SCORING SYSTEM
+----------------
+- Ground Enemy: 1 Point
+- Flying Enemy: 2 Points
+- Boss 1: 15 Points
+- Boss 2: Victory
+
+7. GAME STATES
+-------------
+- Menu: Main Game Screen
+- Playing: Active Gameplay
+- Paused: Game Paused
+- Game Over: Player Loses All Lives
+- Victory: Player Defeats Final Boss
+
+8. AUDIO DESIGN
+--------------
+- Background Music: Level Theme
+- Sound Effects:
+  * Jump
+  * Shoot
+  * Enemy Death
+  * Boss Warning
+  * Boss Music
+  * Boss Death
+  * Key Collection
+  * Game Over
+  * Victory
+
+9. VISUAL DESIGN
+---------------
+9.1 Art Style:
+- Cartoonish
+- Bright Colors
+- Clear Visual Feedback
+
+9.2 Key Visual Elements:
+- Character Animations
+- Enemy Animations
+- Background Scrolling
+- Particle Effects
+- UI Elements
+
+10. USER INTERFACE
+-----------------
+10.1 HUD Elements:
+- Score Display
+- Lives Indicator
+- Pause Menu
+- Game Over Screen
+- Victory Screen
+
+10.2 Menu Elements:
+- Play Button
+- Tutorial Button
+- Return Button
+
+11. PROGRESSION SYSTEM
+---------------------
+- Level 1: Basic Enemies → Boss 1
+- Level 2: Advanced Enemies → Key Collection → Boss 2
+- Tutorial: Available At Any Time
+
+12. GAME BALANCE
+---------------
+- Enemy Spawn Rates
+- Boss Health And Attack Patterns
+- Player Movement Speed
+- Jump Mechanics
+- Projectile Speed And Damage
+
+13. ACCESSIBILITY
+----------------
+- Simple Controls
+- Clear Visual Feedback
+- Tutorial Available
+- Pause Function
+- Restart Option
+
+14. FUTURE EXPANSIONS
+--------------------
+- Additional Levels
+- New Enemy Types
+- More Power-Ups
+- Character Customization
+- Online Leaderboards 

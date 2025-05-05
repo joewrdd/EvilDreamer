@@ -1,0 +1,230 @@
+EVIL DREAMER - TECHNICAL DESIGN DOCUMENT
+
+1. SYSTEM REQUIREMENTS
+---------------------
+1.1 Minimum Requirements:
+- Web Browser: Chrome, Firefox, Edge, Safari
+- JavaScript Enabled
+- HTML5 Canvas Support
+- Audio Support
+- Screen Resolution: 960x540 Minimum
+
+1.2 Development Requirements:
+- Text Editor
+- Web Server
+- Modern Web Browser
+- Audio Editing Software
+- Image Editing Software
+
+2. TECHNICAL ARCHITECTURE
+------------------------
+2.1 Core Components:
+- Game Engine
+- Rendering System
+- Input System
+- Audio System
+- Physics System
+- State Management
+
+2.2 File Structure:
+- js/
+  * game.js (Core Engine)
+  * myCode.js (Game Logic)
+- public/
+  * audio/ (Sound Effects)
+  * background/ (Level Backgrounds)
+  * hero/ (Player Sprites)
+  * enemy/ (Enemy Sprites)
+  * boss/ (Boss Sprites)
+  * theme/ (UI Elements)
+  * lives/ (Life Indicators)
+  * platforms/ (Platform Sprites)
+  * collectibles/ (Power-Up Sprites)
+
+3. CODE STRUCTURE
+----------------
+3.1 Core Classes:
+- Sprite (Base Class)
+- Level (Base Class)
+- Game (Main Engine)
+- SpriteSheet (Animation Handler)
+
+3.2 Game Classes:
+- Menu
+- Level1
+- Level2
+- Tutorial
+- Hero
+- EnemyEasy
+- FlyingEnemy
+- Boss1Enemy
+- Boss2Enemy
+- GameControls
+- Lives
+- Score
+- WinScreen
+- LoseScreen
+
+4. KEY ALGORITHMS
+----------------
+4.1 Collision Detection:
+- Axis-Aligned Bounding Box (AABB)
+- Pixel-Perfect For Projectiles
+- Platform Collision
+- Enemy Collision
+
+4.2 Animation System:
+- Frame-Based Animation
+- State Machine
+- Sprite Sheet Management
+- Frame Timing
+
+4.3 Enemy AI:
+- Path Finding
+- Attack Patterns
+- Spawn Management
+- Boss Behavior
+
+5. DATA STRUCTURES
+-----------------
+5.1 Game State:
+- Level Index
+- Score
+- Lives
+- Player State
+- Enemy List
+- Projectile List
+
+5.2 Animation Data:
+- Frame Counts
+- Frame Timing
+- State Transitions
+- Sprite Dimensions
+
+6. RENDERING PIPELINE
+--------------------
+6.1 Canvas Operations:
+- Background Rendering
+- Sprite Drawing
+- UI Elements
+- Particle Effects
+
+6.2 Optimization:
+- Sprite Batching
+- Dirty Rectangle System
+- Frame Skipping
+- Memory Management
+
+7. INPUT HANDLING
+----------------
+7.1 Keyboard Input:
+- Key State Tracking
+- Key Mapping
+- Input Buffering
+- State Transitions
+
+7.2 Mouse Input:
+- Click Detection
+- Button States
+- Menu Navigation
+- UI Interaction
+
+8. AUDIO SYSTEM
+--------------
+8.1 Sound Management:
+- Audio Loading
+- Playback Control
+- Volume Management
+- Sound Effects Pooling
+
+8.2 Music System:
+- Background Music
+- Boss Music
+- State-Based Music
+- Fade Effects
+
+9. PHYSICS SYSTEM
+----------------
+9.1 Movement:
+- Velocity Calculation
+- Gravity Application
+- Jump Mechanics
+- Platform Collision
+
+9.2 Projectiles:
+- Trajectory Calculation
+- Speed Management
+- Collision Detection
+- Lifetime Management
+
+10. STATE MANAGEMENT
+-------------------
+10.1 Game States:
+- Menu
+- Playing
+- Paused
+- Game Over
+- Victory
+
+10.2 Level States:
+- Initialization
+- Active
+- Transition
+- Completion
+
+11. MEMORY MANAGEMENT
+--------------------
+11.1 Resource Loading:
+- Image Preloading
+- Audio Preloading
+- Sprite Sheet Management
+- Memory Cleanup
+
+11.2 Object Pooling:
+- Enemy Pool
+- Projectile Pool
+- Effect Pool
+- UI Element Pool
+
+12. ERROR HANDLING
+-----------------
+12.1 Error Types:
+- Resource Loading
+- State Transitions
+- Collision Detection
+- Input Processing
+
+12.2 Recovery:
+- Fallback States
+- Resource Reloading
+- State Reset
+- Error Logging
+
+13. PERFORMANCE OPTIMIZATION
+---------------------------
+13.1 Rendering:
+- Canvas Optimization
+- Sprite Culling
+- Frame Rate Control
+- Memory Usage
+
+13.2 Game Logic:
+- Update Frequency
+- Collision Optimization
+- State Updates
+- Resource Management
+
+14. DEBUGGING TOOLS
+------------------
+14.1 Development Tools:
+- Console Logging
+- Performance Monitoring
+- State Visualization
+- Collision Debugging
+
+14.2 Testing:
+- Level Testing
+- Enemy Behavior
+- Boss Patterns
+- Power-Up Functionality
+
