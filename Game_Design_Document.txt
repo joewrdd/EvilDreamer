@@ -1,4 +1,30 @@
-EVIL DREAMER - GAME DESIGN DOCUMENT (CSIS 250)
+EVIL DREAMER - GAME DESIGN DOCUMENT 
+Version: 1.0
+Date: 2025 - 5 - 6
+Developer: Joe Ward
+Class: CSIS 250 Computer Graphics
+
+TABLE OF CONTENTS
+----------------
+1. Game Overview
+2. Game Concept 
+3. Game Mechanics 
+4. Characters
+5. Levels
+6. Scoring System 
+7. Game States
+8. Audio Design 
+9. Visual Design 
+10. User Interface 
+11. Progression System 
+12. Game Balance 
+13. Accessibility 
+14. Future Expansions 
+15. Story and Narrative 
+16. Technical Requirements 
+17. Marketing and Promotion 
+18. Budget and Schedule 
+19. Appendices 
 
 1. GAME OVERVIEW
 ----------------
@@ -150,4 +176,110 @@ Evil Dreamer is a 2D platformer where players control a pink monster character t
 - New Enemy Types
 - More Power-Ups
 - Character Customization
-- Online Leaderboards 
+- Online Leaderboards
+
+15. STORY AND NARRATIVE
+----------------------
+15.1 Main Plot:
+- The Pink Monster, a peaceful creature from the Dream Realm, finds itself trapped in a nightmare world
+- Two powerful bosses, the Dragon and Demon Lord, have corrupted the dream world
+- The player must navigate through the corrupted dream world, defeat the bosses, and restore peace
+
+15.2 Character Motivations:
+- Pink Monster: Seeks to escape the nightmare and return to the peaceful Dream Realm
+- Dragon: Corrupted by dark energy, seeks to spread chaos
+- Demon Lord: The source of corruption, aims to merge the dream world with nightmares
+
+15.3 World Background:
+- The Dream Realm: A peaceful dimension where dreams come to life
+- The Nightmare World: A corrupted version of the Dream Realm
+- The transition between levels represents deeper layers of the nightmare
+
+16. TECHNICAL REQUIREMENTS
+-------------------------
+16.1 Browser Compatibility:
+- Chrome (latest version)
+- Firefox (latest version)
+- Safari (latest version)
+- Edge (latest version)
+
+16.2 Performance Requirements:
+- Minimum 60 FPS
+- Canvas resolution: 960x540
+- Memory usage: < 100MB
+- Load time: < 3 seconds
+
+16.3 Asset Specifications:
+- Sprite sheets: PNG format
+- Audio: MP3 format
+- Font: Boorsok (custom)
+- Image dimensions: Power of 2 for optimal performance
+
+16.4 Development Tools:
+- HTML5 Canvas
+- JavaScript
+- Visual Studio Code
+- Git for version control
+- Chrome DevTools for debugging
+
+17. MARKETING AND PROMOTION
+--------------------------
+17.1 Target Platforms:
+- Web browsers
+- Educational platforms
+- Game development communities
+
+17.2 Marketing Strategy:
+- Social media presence
+- Game development forums
+- Educational institution showcases
+- YouTube gameplay videos
+
+17.3 Release Plans:
+- Beta testing phase
+- Educational institution release
+- Public web release
+- Potential expansion releases
+
+18. BUDGET AND SCHEDULE
+----------------------
+18.1 Development Timeline:
+- Concept and Design: 2 weeks
+- Core Mechanics: 3 weeks
+- Level Design: 2 weeks
+- Asset Creation: 2 weeks
+- Testing and Polish: 1 week
+- Total: 10 weeks
+
+18.2 Resource Allocation:
+- Development: 60%
+- Art Assets: 20%
+- Audio: 10%
+- Testing: 10%
+
+18.3 Cost Estimates:
+- Development Tools: $0 (Open Source)
+- Asset Creation: $0 (Self-created)
+- Hosting: $0 (GitHub Pages)
+- Total Budget: $0 (Educational Project)
+
+19. APPENDICES
+-------------
+19.1 Asset List:
+- Character Sprites: 7 states
+- Enemy Sprites: 4 types
+- Background Images: 2 types
+- UI Elements: 5 types
+- Audio Files: 9 types
+
+19.2 Legal Considerations:
+- Educational use only
+- No commercial distribution
+- Assets created for this project
+- No third-party licenses required
+
+19.3 Reference Materials:
+- Platformer game design patterns
+- HTML5 Canvas documentation
+- JavaScript game development guides
+- Sprite animation techniques 

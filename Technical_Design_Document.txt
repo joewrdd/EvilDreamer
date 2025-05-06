@@ -1,4 +1,28 @@
 EVIL DREAMER - TECHNICAL DESIGN DOCUMENT
+Version: 1.0
+Date: 2025-05-06
+Developer: Joe Ward
+Class: CSIS 250 Computer Graphics
+
+TABLE OF CONTENTS
+----------------
+1. System Requirements 
+2. Technical Architecture
+3. Code Structure 
+4. Key Algorithms 
+5. Data Structures 
+6. Rendering Pipeline 
+7. Input Handling 
+8. Audio System 
+9. Physics System 
+10. State Management
+11. Memory Management 
+12. Error Handling 
+13. Performance Optimization 
+14. Debugging Tools 
+15. Testing and Quality Assurance 
+16. Documentation 
+17. Deployment 
 
 1. SYSTEM REQUIREMENTS
 ---------------------
@@ -59,6 +83,8 @@ EVIL DREAMER - TECHNICAL DESIGN DOCUMENT
 - FlyingEnemy
 - Boss1Enemy
 - Boss2Enemy
+- EnemyGenerator1
+- EnemyGenerator2
 - GameControls
 - Lives
 - Score
@@ -227,4 +253,84 @@ EVIL DREAMER - TECHNICAL DESIGN DOCUMENT
 - Enemy Behavior
 - Boss Patterns
 - Power-Up Functionality
+
+15. TESTING AND QUALITY ASSURANCE
+-------------------------------
+15.1 Testing Strategy:
+- Unit Testing: Individual component testing
+- Integration Testing: Component interaction testing
+- System Testing: End-to-end game flow testing
+- Performance Testing: FPS and memory usage monitoring
+
+15.2 Test Cases:
+- Player Movement
+- Enemy Behavior
+- Collision Detection
+- State Transitions
+- Audio Playback
+- Resource Loading
+
+15.3 Quality Metrics:
+- Frame Rate: Minimum 60 FPS
+- Memory Usage: < 100MB
+- Load Time: < 3 seconds
+- Error Rate: < 0.1%
+
+15.4 Testing Tools:
+- Chrome DevTools
+- Performance Profiler
+- Memory Heap Snapshot
+- Console Debugging
+
+16. DOCUMENTATION
+----------------
+16.1 Code Documentation:
+- JSDoc Comments
+- Function Descriptions
+- Class Documentation
+- API Documentation
+
+16.2 User Documentation:
+- Installation Guide
+- Game Controls
+- Troubleshooting Guide
+- FAQ Section
+
+16.3 Technical Documentation:
+- Architecture Diagrams
+- Class Diagrams
+- Sequence Diagrams
+- State Diagrams
+
+16.4 Maintenance Documentation:
+- Update Procedures
+- Bug Fix Guidelines
+- Performance Optimization Guide
+- Asset Management Guide
+
+17. DEPLOYMENT
+-------------
+17.1 Build Process:
+- Code Minification
+- Asset Optimization
+- Bundle Creation
+- Version Control
+
+17.2 Hosting:
+- GitHub Pages
+- Web Server Configuration
+- SSL Certificate
+- Domain Setup
+
+17.3 Monitoring:
+- Error Tracking
+- Performance Monitoring
+- User Analytics
+- Server Health Checks
+
+17.4 Maintenance:
+- Regular Updates
+- Bug Fixes
+- Performance Optimization
+- Security Patches
 

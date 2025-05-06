@@ -2197,7 +2197,6 @@ class LoseScreen extends Sprite {
     this.levelAtGameOver = game.levelIndex;
     this.gameOverSound = new Audio("public/audio/lose.mp3");
     this.stopped = false;
-    this.bindKeyboardEvents();
   }
 
   // Update LoseScreen
@@ -2215,6 +2214,19 @@ class LoseScreen extends Sprite {
         }
       }
     }
+
+    // Restart Level
+    if (keys["r"] || keys["R"]) {
+      this.game.sprites = [];
+      this.game.levels[this.levelAtGameOver].init();
+    }
+
+    // Go to Menu
+    if (keys["g"] || keys["G"]) {
+      this.game.sprites = [];
+      this.game.levels[0].init();
+    }
+
     return false;
   }
 
@@ -2251,19 +2263,6 @@ class LoseScreen extends Sprite {
     );
     ctx.restore();
   }
-
-  bindKeyboardEvents() {
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "r" || e.key === "R") {
-        this.game.sprites = [];
-        this.game.levels[this.levelAtGameOver].init();
-      }
-      if (e.key === "g" || e.key === "G") {
-        this.game.sprites = [];
-        this.game.levels[0].init();
-      }
-    });
-  }
 }
 
 // WinScreen Class
@@ -2274,7 +2273,6 @@ class WinScreen extends Sprite {
     this.levelAtGameOver = game.levelIndex;
     this.winSound = new Audio("public/audio/win.mp3");
     this.stopped = false;
-    this.bindKeyboardEvents();
   }
 
   // Update WinScreen
@@ -2292,6 +2290,19 @@ class WinScreen extends Sprite {
         }
       }
     }
+
+    // Restart Level
+    if (keys["r"] || keys["R"]) {
+      this.game.sprites = [];
+      this.game.levels[1].init();
+    }
+
+    // Go to Menu
+    if (keys["g"] || keys["G"]) {
+      this.game.sprites = [];
+      this.game.levels[0].init();
+    }
+
     return false;
   }
 
@@ -2327,20 +2338,6 @@ class WinScreen extends Sprite {
       this.game.canvas.height / 2 + 60
     );
     ctx.restore();
-  }
-
-  // Bind Keyboard Events
-  bindKeyboardEvents() {
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "r" || e.key === "R") {
-        this.game.sprites = [];
-        this.game.levels[1].init();
-      }
-      if (e.key === "g" || e.key === "G") {
-        this.game.sprites = [];
-        this.game.levels[0].init();
-      }
-    });
   }
 }
 
@@ -2574,11 +2571,28 @@ class GameControls extends Sprite {
     this.game = game;
     this.paused = false;
     this.restart = false;
-    this.bindKeyboardEvents();
   }
 
   // Update GameControls
   update(sprites, keys) {
+    // Pause Game
+    if (keys["p"] || keys["P"]) {
+      this.paused = true;
+    }
+
+    // Continue Game
+    if (keys["c"] || keys["C"]) {
+      this.paused = false;
+    }
+
+    // Restart Level
+    if (keys["r"] || keys["R"]) {
+      this.paused = false;
+      this.game.sprites = [];
+      this.game.levels[this.game.levelIndex].init();
+    }
+
+    // Return False
     return false;
   }
 
@@ -2611,23 +2625,6 @@ class GameControls extends Sprite {
       );
       ctx.restore();
     }
-  }
-
-  // Bind Keyboard Events For Game Controls
-  bindKeyboardEvents() {
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "p" || e.key === "P") {
-        this.paused = true;
-      }
-      if (e.key === "c" || e.key === "C") {
-        this.paused = false;
-      }
-      if (e.key === "r" || e.key === "R") {
-        this.paused = false;
-        this.game.sprites = [];
-        this.game.levels[this.game.levelIndex].init();
-      }
-    });
   }
 }
 
