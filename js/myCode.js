@@ -2214,24 +2214,23 @@ class LoseScreen extends Sprite {
         }
       }
     }
-
-    // Restart Level
-    if (keys["r"] || keys["R"]) {
-      this.game.sprites = [];
-      this.game.levels[this.levelAtGameOver].init();
-    }
-
-    // Go to Menu
-    if (keys["g"] || keys["G"]) {
-      this.game.sprites = [];
-      this.game.levels[0].init();
-    }
-
     return false;
   }
 
   // Draw LoseScreen On Canvas
   draw(ctx) {
+    // Handle Keyboard Events In Draw Since Update Isn't Called When Paused
+    if (this.game.keys["r"] || this.game.keys["R"]) {
+      this.game.sprites = [];
+      this.game.levels[this.levelAtGameOver].init();
+    }
+
+    // Go to Menu
+    if (this.game.keys["g"] || this.game.keys["G"]) {
+      this.game.sprites = [];
+      this.game.levels[0].init();
+    }
+
     ctx.save();
     ctx.globalAlpha = 0.7;
     ctx.fillStyle = "#0CC0DF";
@@ -2290,24 +2289,22 @@ class WinScreen extends Sprite {
         }
       }
     }
-
-    // Restart Level
-    if (keys["r"] || keys["R"]) {
-      this.game.sprites = [];
-      this.game.levels[1].init();
-    }
-
-    // Go to Menu
-    if (keys["g"] || keys["G"]) {
-      this.game.sprites = [];
-      this.game.levels[0].init();
-    }
-
     return false;
   }
 
   // Draw WinScreen On Canvas
   draw(ctx) {
+    // Handle Keyboard Events In Draw Since Update Isn't Called When Paused
+    if (this.game.keys["r"] || this.game.keys["R"]) {
+      this.game.sprites = [];
+      this.game.levels[1].init();
+    }
+    // Go to Menu
+    if (this.game.keys["g"] || this.game.keys["G"]) {
+      this.game.sprites = [];
+      this.game.levels[0].init();
+    }
+
     ctx.save();
     ctx.globalAlpha = 0.7;
     ctx.fillStyle = "#0CC0DF";
@@ -2569,36 +2566,30 @@ class GameControls extends Sprite {
   constructor(game) {
     super();
     this.game = game;
-    this.paused = false;
-    this.restart = false;
   }
 
   // Update GameControls
   update(sprites, keys) {
     // Pause Game
     if (keys["p"] || keys["P"]) {
-      this.paused = true;
+      this.game.paused = true;
     }
-
-    // Continue Game
-    if (keys["c"] || keys["C"]) {
-      this.paused = false;
-    }
-
-    // Restart Level
-    if (keys["r"] || keys["R"]) {
-      this.paused = false;
-      this.game.sprites = [];
-      this.game.levels[this.game.levelIndex].init();
-    }
-
-    // Return False
     return false;
   }
 
   // Draw GameControls On Canvas
   draw(ctx) {
-    if (this.paused) {
+    if (this.game.paused) {
+      // Handle Keyboard Events In Draw Since Update Isn't Called When Paused
+      if (this.game.keys["c"] || this.game.keys["C"]) {
+        this.game.paused = false;
+      }
+      if (this.game.keys["r"] || this.game.keys["R"]) {
+        this.game.paused = false;
+        this.game.sprites = [];
+        this.game.levels[this.game.levelIndex].init();
+      }
+
       ctx.save();
       ctx.globalAlpha = 0.7;
       ctx.fillStyle = "#000";

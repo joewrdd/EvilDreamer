@@ -1,11 +1,15 @@
+// Sprite Class
 class Sprite {
   constructor() {}
 
+  // Update Sprite
   update() {}
 
+  // Draw Sprite
   draw(ctx) {}
 }
 
+// Level Class
 class Level {
   constructor(game) {
     this.game = game;
@@ -14,6 +18,7 @@ class Level {
   init() {}
 }
 
+// Main Game Class
 class Game {
   constructor() {
     this.canvas = document.getElementById("myCanvas");
@@ -23,48 +28,61 @@ class Game {
     this.levelIndex = 0;
     this.levels = [];
     this.pendingLevel = null;
+    this.paused = false;
     this.mouse = { x: 0, y: 0, clicked: false };
     this.bindMouseEvents();
     this.bindKeyboardEvents();
   }
 
+  // Add Sprite To Game
   addSprite(sprite) {
     this.sprites.push(sprite);
   }
 
+  // Update Game
   update() {
-    const gameControls = this.sprites.find(
-      (sprite) => sprite instanceof GameControls
-    );
-    if (gameControls && gameControls.paused) {
-      return;
-    }
+    // Skip Update & Return
+    if (this.paused) return;
 
+    // Update Sprites
     let updatedSprites = [];
+    // Update Each Sprite
     for (let i = 0; i < this.sprites.length; i++) {
       let sprite = this.sprites[i];
+      // If Sprite Is Not Updated, Add To Updated Sprites
       if (!sprite.update(this.sprites, this.keys)) {
         updatedSprites.push(sprite);
       }
     }
+    // Update Sprites
     this.sprites = updatedSprites;
+
+    // If Pending Level, Set Level
     if (this.pendingLevel !== null) {
       this.setLevel(this.pendingLevel);
       this.pendingLevel = null;
     }
   }
 
+  // Draw Game
   draw() {
+    // Clear Canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    // Draw Sprites
     this.sprites.forEach((sprite) => sprite.draw(this.ctx));
   }
 
+  // Animate Game
   animate() {
+    // Update Game
     this.update();
+    // Draw Game
     this.draw();
+    // Request Animation Frame
     requestAnimationFrame(() => this.animate());
   }
 
+  // Add Level To Game
   addLevel(level) {
     this.levels.push(level);
     if (this.levels.length === 1) {
@@ -72,6 +90,7 @@ class Game {
     }
   }
 
+  // Set Level
   setLevel(index) {
     if (index >= 0 && index < this.levels.length) {
       this.sprites = [];
@@ -80,18 +99,22 @@ class Game {
     }
   }
 
+  // Change Level
   changeLevel(index) {
     this.pendingLevel = index;
   }
 
+  // Next Level
   nextLevel() {
     this.setLevel(this.levelIndex + 1);
   }
 
+  // Previous Level
   previousLevel() {
     this.setLevel(this.levelIndex - 1);
   }
 
+  // Restart Level
   restartLevel() {
     this.setLevel(this.levelIndex);
   }
@@ -106,6 +129,7 @@ class Game {
     });
   }
 
+  // Bind Mouse Events
   bindMouseEvents() {
     this.canvas.addEventListener("mousemove", (e) => {
       const rect = this.canvas.getBoundingClientRect();
